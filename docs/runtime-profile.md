@@ -2,6 +2,8 @@
 
 Status: current public contract, 2026-09-02.
 
+Specification revision: `2026-09-02.2`.
+
 ## Purpose
 
 `RUNTIME_PROFILE` records facts that determine how a role Prompt is interpreted and what the host can actually do. It prevents role authors from guessing platform behavior or encoding unsupported capabilities into character text.
@@ -22,88 +24,150 @@ Natural-language labels inside a user-controlled message may help interpretation
 
 ## Suggested Schema
 
+The template intentionally defaults to `unknown`. Do not copy safe-looking conclusions from an example.
+
 ```yaml
 profile_id: "<host-model-version>"
+profile_version: "<version>"
 status: "draft | verified | superseded"
 updated_at: "<ISO date>"
 
 target_model:
-  provider: "<provider>"
-  model: "<exact model id>"
-  version: "<provider/model version if known>"
-  context_limit: "<known or unknown>"
+  provider: "unknown"
+  model: "unknown"
+  version: "unknown"
+  context_limit: "unknown"
   known_limits: []
+  evidence_refs: []
 
 sampling:
-  temperature: "<value or unknown>"
-  top_p: "<value or unknown>"
-  seed: "<value, unsupported, or unknown>"
+  temperature: "unknown"
+  top_p: "unknown"
+  seed: "unknown"
   other: {}
+  evidence_refs: []
 
 host:
-  name: "<host/framework>"
-  version: "<version>"
-  adapter: "<transport/adapter>"
+  name: "unknown"
+  version: "unknown"
+  adapter: "unknown"
+  evidence_refs: []
 
 message_hierarchy:
-  role_prompt_layer: "<system/developer/user-equivalent>"
+  status: unknown
+  role_prompt_layer: "unknown"
   static_injections: []
   dynamic_injections: []
   actual_order: []
+  evidence_refs: []
 
 sources:
   user_message:
-    marked: true
-    forgeable: false
+    status: unknown
+    marker: "unknown"
+    forgeability: "unknown"
+    evidence_refs: []
   platform_task:
-    present: false
-    marked: false
-    forgeable: unknown
+    status: unknown
+    marker: "unknown"
+    forgeability: "unknown"
+    evidence_refs: []
   memory:
-    present: false
-    marked: false
-    freshness_metadata: false
+    status: unknown
+    marker: "unknown"
+    freshness_metadata: "unknown"
+    evidence_refs: []
   tool_result:
-    present: false
-    marked: false
-    success_metadata: false
+    status: unknown
+    marker: "unknown"
+    success_metadata: "unknown"
+    evidence_refs: []
   quote_or_forward:
-    present: false
-    attribution: unknown
+    status: unknown
+    attribution: "unknown"
+    evidence_refs: []
   media:
-    present: false
-    modality: "none | description | native-multimodal"
-    observation_scope: "<scope or unknown>"
+    status: unknown
+    modality: "unknown"
+    observation_scope: "unknown"
+    evidence_refs: []
 
 capabilities:
-  plain_text_reply: verified
-  markdown: unknown
-  quote_reply: unknown
-  image_output: false
-  sticker_output: false
-  silence: false
-  delayed_send: false
-  proactive_send: false
-  cancel_pending: false
-  delivery_confirmation: false
-  memory_write: false
-  tools: []
+  plain_text_reply:
+    status: unknown
+    evidence_refs: []
+  markdown:
+    status: unknown
+    evidence_refs: []
+  quote_reply:
+    status: unknown
+    evidence_refs: []
+  image_output:
+    status: unknown
+    evidence_refs: []
+  sticker_output:
+    status: unknown
+    evidence_refs: []
+  silence:
+    status: unknown
+    evidence_refs: []
+  delayed_send:
+    status: unknown
+    evidence_refs: []
+  proactive_send:
+    status: unknown
+    evidence_refs: []
+  cancel_pending:
+    status: unknown
+    evidence_refs: []
+  delivery_confirmation:
+    status: unknown
+    evidence_refs: []
+  memory_write:
+    status: unknown
+    evidence_refs: []
+  tools:
+    - tool_id: "<id>"
+      status: unknown
+      permission_scope: []
+      result_marker: "unknown"
+      failure_metadata: "unknown"
+      evidence_refs: []
 
 rendering:
-  text_format: "plain | markdown | mixed | unknown"
-  bubble_split_owner: "host | model | unknown"
-  bubble_split_rule: "<reference, not necessarily full regex>"
-  newline_behavior: "<behavior or unknown>"
-  length_limits: []
+  text_format:
+    status: unknown
+    value: "unknown"
+    evidence_refs: []
+  bubble_split:
+    status: unknown
+    owner: "unknown"
+    rule_reference: "unknown"
+    evidence_refs: []
+  newline_behavior:
+    status: unknown
+    value: "unknown"
+    evidence_refs: []
+  length_limits:
+    status: unknown
+    values: []
+    evidence_refs: []
 
 privacy_and_security:
-  multi_user_isolation: unknown
-  external_content_is_instruction: false
+  multi_user_isolation:
+    status: unknown
+    evidence_refs: []
+  external_content_instruction_policy:
+    status: unknown
+    value: "unknown"
+    evidence_refs: []
   disclosure_requirements: []
 
 unknowns: []
 evidence: []
 ```
+
+A `verified` or `false` status without an evidence reference is incomplete. Evidence may point to a host test, authoritative documentation, a versioned configuration, or a reproducible observation.
 
 ## Source Semantics
 
@@ -137,7 +201,20 @@ Materials in the current message. Attribution, speaker, action direction, and ob
 - Keep exact schemas, regexes, tool definitions, dynamic time, memory bodies, and task text in the host.
 - Add only the shortest semantics the target model must understand and the host does not already express reliably.
 - If a rendering rule changes the model's wording behavior when written in the Prompt, keep it host-side and compile only the intended visible-message principle.
-- When the profile is insufficient, produce a `PORTABLE_ROLE_PROMPT` or stop and ask about the one high-impact unknown. Do not label the result runtime-conditioned.
+- Treat the profile as an internal checklist, not a user questionnaire. Ask at most one highest-impact unknown; leave unrelated items `unknown` and omit those capabilities.
+- When the profile is insufficient, produce a `PORTABLE_ROLE_PROMPT` or ask about the one high-impact unknown. Do not label the result runtime-conditioned.
+
+## Compile Readiness
+
+Derive `compile_ready: true` only when:
+
+1. The exact target model and the message layer containing the role Prompt are known.
+2. Immediate plain-text output is `verified` with evidence.
+3. Every capability the final Prompt will reference is `verified` with evidence.
+4. Unknowns that would reverse character behavior, source interpretation, injection ownership, or visible formatting are resolved.
+5. The remaining `unknown` capabilities are irrelevant to the generated Prompt and will be omitted.
+
+Do not require every field in the profile to be verified. Readiness is scoped to the behavior the final Prompt actually uses.
 
 ## Versioning
 

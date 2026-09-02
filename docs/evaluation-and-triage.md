@@ -2,6 +2,8 @@
 
 Status: current shared protocol, 2026-09-02.
 
+Specification revision: `2026-09-02.2`.
+
 ## Purpose
 
 This is the single owner of testing, failure attribution, revision, regression, and Prompt-only stopping rules.
@@ -24,7 +26,21 @@ Review `ROLE_SPEC` without requiring a target platform:
 
 Failure returns to `define`.
 
-### 2. Compilation Review
+### 2. Portable Build Review
+
+Review `PORTABLE_ROLE_PROMPT` against `ROLE_SPEC`:
+
+- accepted character semantics are preserved;
+- the build assumes only immediate plain-text output;
+- it does not promise tools, memory, media, quoting, delay, proactive sending, cancellation, or delivery confirmation;
+- it does not contain platform labels, exact schemas, regexes, or dynamic context;
+- it is clearly marked outside the Prompt body as not runtime-conditioned;
+- it is the only temporary injected role Prompt and will be replaced, not supplemented, by a final build;
+- a recoverable `BUILD_RECORD` exists.
+
+Failure returns to `define` or the portable build step.
+
+### 3. Compilation Review
 
 Review `FINAL_ROLE_PROMPT` against `ROLE_SPEC`, `PRESERVATION_MAP`, and `RUNTIME_PROFILE`:
 
@@ -36,10 +52,12 @@ Review `FINAL_ROLE_PROMPT` against `ROLE_SPEC`, `PRESERVATION_MAP`, and `RUNTIME
 - authoring assets, research terms, scoring, and per-turn algorithms are absent;
 - private-chat behavior is character-specific rather than a universal short-reply template;
 - Prompt length reflects necessary decisions rather than accumulated repairs.
+- the `RUNTIME_PROFILE` satisfies `compile_ready` for every capability the Prompt references;
+- a recoverable `BUILD_RECORD` exists.
 
 Failure returns to `compile` or the runtime profile owner.
 
-### 3. Real Integration And Human Validation
+### 4. Real Integration And Human Validation
 
 Test in the actual target environment. Fix:
 
@@ -56,7 +74,7 @@ Assess observable behavior rather than asking whether the model can repeat writt
 
 Avoid trajectories that repeatedly test search, injection, boundaries, or explicitly documented persona facts. Such tests measure instruction retrieval and may overfit the Prompt rather than evaluate ordinary interaction.
 
-### 4. Capability Audit
+### 5. Capability Audit
 
 Verify that time, state, source identity, tools, media, delay, proactive sending, cancellation, memory, and delivery are actually provided by the host.
 
@@ -126,6 +144,8 @@ insufficient_evidence
 
 Multiple contributing factors may be noted, but the next iteration tests one primary hypothesis. This preserves causal attribution.
 
+A single anomalous sample defaults to `insufficient_evidence`. `sampling_variance` may be the primary hypothesis to test, but should not be stated as an established cause until repeated independent sessions support it.
+
 ## Revision Rules
 
 1. Change the owning source: `ROLE_SPEC`, `RUNTIME_PROFILE`, or compiler rule.
@@ -135,6 +155,8 @@ Multiple contributing factors may be noted, but the next iteration tests one pri
 5. Do not convert one good or bad sample into a universal rule.
 6. Prefer deletion, clearer ownership, and simpler priority over another exception.
 7. Record version, hypothesis, changed source, environment, result, and whether the observation is author-reviewed, model-tested, or human-validated.
+
+When the user asks only for diagnosis, return `TRIAGE_RESULT`. When the user explicitly asks for a fix and evidence sufficiently supports a Prompt-owned cause, complete the owning revision and rebuild in the same authoring run. Host, model, sampling, preference, and insufficient-evidence causes remain diagnostic results rather than forced Prompt edits.
 
 ## Regression
 

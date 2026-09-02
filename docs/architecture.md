@@ -2,6 +2,8 @@
 
 Status: current public architecture, 2026-09-02.
 
+Specification revision: `2026-09-02.2`.
+
 ## Scope
 
 This repository defines an authoring method for realistic one-to-one direct-message role Prompts. It covers character definition, runtime-conditioned Prompt compilation, and evidence-based diagnosis.
@@ -21,6 +23,7 @@ ordinary user request
      -> compile for known runtime conditions when possible
      -> audit real failures before revision
   -> one main artifact for the current request
+  -> non-injectable build provenance retained separately
 ```
 
 ## Three Responsibility Layers
@@ -79,22 +82,32 @@ Each public document has one responsibility:
 
 If two documents appear to own the same rule, move the detailed rule to the owner above and leave only a short pointer elsewhere.
 
+The maintainer documents above are normative sources. The bilingual Skill files are synchronized standalone release artifacts derived from this specification. When a conflict is found, resolve it in the owning document, update the specification revision, then update both Skill languages and routing tests together.
+
 ## Authoring Pipeline
 
 ```text
 USER_INTENT + CANON
   -> ROLE_SPEC
 
-ROLE_SPEC + RUNTIME_PROFILE + PRESERVATION_MAP
+ROLE_SPEC
   -> PORTABLE_ROLE_PROMPT, when runtime is unknown
-  -> FINAL_ROLE_PROMPT, when runtime is known
+
+ROLE_SPEC + compile-ready RUNTIME_PROFILE
+  + PRESERVATION_MAP, when rewriting accepted text
+  -> FINAL_ROLE_PROMPT
 
 EVIDENCE_RECORD
   -> TRIAGE_RESULT
   -> revise the owning source only when evidence is sufficient
+
+every prompt build
+  -> BUILD_RECORD, retained outside the target Prompt
 ```
 
 The final Prompt is a build artifact. Future iterations should return to the accepted semantic and runtime sources instead of endlessly patching the last generated text.
+
+“One main artifact” means one user-facing result and one injected role Prompt, not one total authoring file. A production workflow must persist the versioned `ROLE_SPEC` and a minimal `BUILD_RECORD`. In a chat-only environment without persistence, the build record is returned as a clearly separated non-injectable sidecar.
 
 ## Private-Chat Execution Principles
 

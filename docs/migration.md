@@ -2,6 +2,8 @@
 
 Status: current migration guide, 2026-09-02.
 
+Specification revision: `2026-09-02.2`.
+
 ## Historical Assets
 
 The repository preserves two earlier bilingual methods under `archive/`:
@@ -69,9 +71,9 @@ Extract stable identity, drives, values, tensions, attention, relationship needs
 
 Do not assume the old headings, examples, or wording must survive.
 
-### 3. Build `PRESERVATION_MAP`
+### 3. Build `PRESERVATION_MAP` When Needed
 
-Mark accepted semantics as `must_preserve`, runtime wording as `may_adapt`, unauthorized additions as `must_not_add`, and behavior-reversing ambiguity as `unresolved`.
+When migrating accepted text or locked design, mark accepted semantics as `must_preserve`, runtime wording as `may_adapt`, unauthorized additions as `must_not_add`, and behavior-reversing ambiguity as `unresolved`. A new character with no prior accepted text may compile directly from its accepted `ROLE_SPEC`.
 
 ### 4. Build Or Verify `RUNTIME_PROFILE`
 
@@ -79,7 +81,9 @@ Record exact model, provider, host, injection order, source labels, memory, tool
 
 ### 5. Recompile From Semantic Sources
 
-Write one Prompt from `ROLE_SPEC`, `PRESERVATION_MAP`, and verified runtime facts. Do not append the companion compiler or a generic private-chat block to the old card.
+Write one Prompt from `ROLE_SPEC`, verified runtime facts, and `PRESERVATION_MAP` when applicable. Do not append the companion compiler or a generic private-chat block to the old card.
+
+Create a minimal `BUILD_RECORD` that links the resulting Prompt version to the preserved `ROLE_SPEC`, runtime profile, and preservation map.
 
 ### 6. Validate And Triage
 

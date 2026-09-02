@@ -18,9 +18,12 @@ The Skill internally routes among `define`, `compile`, and `audit`, but returns 
 - a reusable `ROLE_SPEC`;
 - an unconditioned `PORTABLE_ROLE_PROMPT` when explicitly requested;
 - a runtime-bound `FINAL_ROLE_PROMPT`;
-- or a diagnostic `TRIAGE_RESULT`.
+- a diagnostic `TRIAGE_RESULT`;
+- or a non-injectable `EVALUATION_PLAN`.
 
 Only one prompt may be used for a target deployment. `PORTABLE_ROLE_PROMPT` and `FINAL_ROLE_PROMPT` must never be injected together.
+
+Every portable or final build also retains a minimal non-injectable `BUILD_RECORD`. This provenance sidecar is not another role Prompt.
 
 ## Historical Files
 

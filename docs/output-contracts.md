@@ -2,11 +2,13 @@
 
 Status: current public contract, 2026-09-02.
 
+Specification revision: `2026-09-02.2`.
+
 ## Purpose
 
 These contracts prevent character semantics, runtime facts, failure evidence, and deployable Prompt text from becoming one untraceable document.
 
-The names below are authoring-side interfaces. They must not appear inside the final role Prompt unless the user is explicitly discussing Prompt design rather than using the role.
+The names below are authoring-side interfaces. They must never appear inside a deployable role Prompt. They may appear only in authoring discussion outside the Prompt body.
 
 ## Artifact Table
 
@@ -19,6 +21,8 @@ The names below are authoring-side interfaces. They must not appear inside the f
 | `PORTABLE_ROLE_PROMPT` | `define` build | Usable baseline without a fixed runtime | Yes, only as the sole temporary Prompt |
 | `FINAL_ROLE_PROMPT` | `compile` build | Runtime-conditioned deployment Prompt | Yes, the sole final Prompt |
 | `TRIAGE_RESULT` | `audit` | Responsibility, evidence strength, hypothesis, next action | No |
+| `EVALUATION_PLAN` | `audit` planning | Controlled test or regression plan | No |
+| `BUILD_RECORD` | Authoring workflow | Minimum build provenance and validation status | No |
 | `NON_INJECTABLE_MANIFEST` | Authoring workflow | Version, assumptions, removals, capability gaps | No |
 
 `PORTABLE_ROLE_PROMPT` and `FINAL_ROLE_PROMPT` must never be injected together.
@@ -31,6 +35,7 @@ Recommended fields:
 
 ```yaml
 role_id: "<stable identifier>"
+role_spec_version: "<version>"
 canon_scope:
   source: "<source or user-defined>"
   version: "<version or unknown>"
@@ -70,9 +75,10 @@ The schema is illustrative, not a requirement that ordinary users fill a form. T
 
 ## `PRESERVATION_MAP`
 
-Create this before rewriting an accepted role card:
+Create this before rewriting an accepted role card, migrating an accepted design, or honoring explicitly locked content:
 
 ```yaml
+preservation_map_version: "<version>"
 must_preserve: []
 may_adapt: []
 must_not_add: []
@@ -85,6 +91,8 @@ unresolved: []
 - `unresolved`: ambiguity that could reverse behavior and must be clarified or preserved as uncertainty.
 
 Deleting or changing a `must_preserve` item requires explicit user authorization or evidence that the accepted source was wrong.
+
+For a new character with no accepted prior text, `ROLE_SPEC` is sufficient; do not create an empty map only to satisfy the workflow.
 
 ## `RUNTIME_PROFILE`
 
@@ -137,12 +145,20 @@ It is a build artifact. Do not treat edits made only to this text as the authori
 
 ## `FINAL_ROLE_PROMPT`
 
-Use only when a sufficient `RUNTIME_PROFILE` exists.
+Use only when a `compile_ready` `RUNTIME_PROFILE` exists.
+
+`compile_ready` means:
+
+- the exact target model and role-Prompt message layer are known;
+- immediate plain-text output is verified;
+- every capability referenced by the final Prompt is `verified` with evidence;
+- unknowns that would reverse character behavior, source interpretation, or visible formatting are resolved;
+- unrelated capabilities may remain `unknown` and must be omitted.
 
 Requirements:
 
 - Identifies the build's `ROLE_SPEC` version and `runtime_profile_id` in non-injectable records, not in the Prompt body.
-- Preserves `must_preserve` and respects `must_not_add`.
+- Preserves `must_preserve` and respects `must_not_add` when a preservation map applies.
 - Contains only the minimum runtime semantics the target model needs.
 - Does not duplicate exact schemas, regexes, dynamic context, or higher-level platform injection.
 - Contains no authoring workflow, evaluation rubric, research terminology, or unsupported capability.
@@ -154,6 +170,7 @@ Recommended fields:
 
 ```yaml
 responsible_layer: "definition_fault | compilation_fault | host_contract_fault | model_limit | sampling_variance | preference_mismatch | insufficient_evidence"
+evidence_basis: "static | single-sample | repeated-runtime | human-validated"
 evidence_strength: "<level>"
 primary_hypothesis: "<one testable hypothesis>"
 supporting_observations: []
@@ -163,6 +180,50 @@ prompt_change_authorized: false
 ```
 
 `audit` should not silently set `prompt_change_authorized: true`. Evidence must support a Prompt-owned failure and the user must want a revision.
+
+When evidence is incomplete, `TRIAGE_RESULT` may be provisional. It should still identify evidence strength and request only the one additional fact most likely to distinguish the candidate causes.
+
+## `EVALUATION_PLAN`
+
+Use when the user asks for testing or regression design rather than a new role Prompt.
+
+Recommended fields:
+
+```yaml
+plan_id: "<id>"
+evidence_basis: "static | real-runtime"
+fixed_conditions: []
+variable_under_test: "<one variable>"
+cases: []
+observable_failures: []
+repetition: "<count and session reset rule>"
+human_validation: "required | optional | not-planned"
+stop_conditions: []
+privacy_constraints: []
+```
+
+`EVALUATION_PLAN` belongs to the `audit` planning path. It is non-injectable and does not create a fourth authoring mode.
+
+## `BUILD_RECORD`
+
+Every portable or final Prompt build must retain:
+
+```yaml
+build_record_version: "<version>"
+role_spec_version: "<version>"
+prompt_version: "<version>"
+build_mode: "portable | final"
+runtime_profile_id: "<id or none>"
+preservation_map_version: "<version or none>"
+skill_version: "<version>"
+spec_revision: "<revision>"
+validation_status: "author-reviewed | model-tested | human-validated"
+created_at: "<ISO date>"
+```
+
+The build record is not a second role Prompt. Persist it in the authoring workspace. If the environment cannot retain files or hidden state, provide it as a separate minimal non-injectable sidecar.
+
+The referenced `ROLE_SPEC` must also be recoverable. A build record containing only a version number is insufficient when no corresponding semantic source exists.
 
 ## `NON_INJECTABLE_MANIFEST`
 
@@ -182,11 +243,16 @@ Mark it clearly as non-injectable and keep it outside the same copy block or fil
 ```text
 USER_INTENT + CANON
   -> ROLE_SPEC
-  -> PRESERVATION_MAP
 
-ROLE_SPEC + RUNTIME_PROFILE
+ROLE_SPEC
   -> PORTABLE_ROLE_PROMPT, if runtime is not fixed
-  -> FINAL_ROLE_PROMPT, if runtime is fixed
+
+ROLE_SPEC + compile-ready RUNTIME_PROFILE
+  + PRESERVATION_MAP, when rewriting accepted text
+  -> FINAL_ROLE_PROMPT
+
+each portable or final build
+  -> BUILD_RECORD
 
 real observation
   -> EVIDENCE_RECORD

@@ -1,6 +1,8 @@
 # Direct-Message Role Prompt Authoring Skill
 
-Version: `2.0.0-draft.1`
+Version: `2.0.0-draft.2`
+
+Specification revision: `2026-09-02.2`
 
 ## Purpose And Position
 
@@ -29,7 +31,7 @@ A role rule cannot create observations, facts, or actions that the host does not
 2. A target deployment contains one role Prompt, not `old role card + private-chat patch + platform notes`.
 3. Rewrite from semantic sources. Do not inject authoring analysis, asset names, evaluation standards, or research terminology into the target model.
 4. Role definition, runtime facts, and failure evidence each have one owner. Modify the source asset that owns a diagnosed problem.
-5. Return only one main artifact by default. Provide other materials separately only when the user explicitly asks.
+5. Return only one main artifact by default. “One main artifact” does not permit losing authoring-side semantic sources; every Prompt build must retain a non-injectable `BUILD_RECORD`, and a persistent workspace must preserve the referenced `ROLE_SPEC`.
 6. Preserve accepted character design. Do not change meaning without support from Canon, runtime conditions, or failure evidence.
 7. Optimize for relative improvement under the same model and host, not absolute performance across models and platforms.
 
@@ -44,11 +46,14 @@ Choose the internal mode from the user's starting point:
 | Create a Prompt for a known model and platform | `define -> compile` | `FINAL_ROLE_PROMPT` |
 | Existing role card has trusted character semantics and only needs adaptation | Parse and freeze character semantics, then `compile` | `FINAL_ROLE_PROMPT` |
 | Existing card has confused Canon, personality, or relationship logic | `audit -> define`, then compile if needed | One repair artifact appropriate to the request |
-| Real chat feels unnatural or becomes OOC | Start with `audit` | `TRIAGE_RESULT`; revise only when evidence is sufficient |
+| Real chat feels unnatural or becomes OOC, and the user only wants diagnosis | `audit` | `TRIAGE_RESULT` |
+| Real chat feels unnatural and the user explicitly asks for a fix | `audit ->` owning mode; rebuild only when evidence is sufficient and Prompt-owned | A new `PORTABLE_ROLE_PROMPT`, `FINAL_ROLE_PROMPT`, or `ROLE_SPEC`; otherwise `TRIAGE_RESULT` |
 | The request is only about platform, tools, injection, scheduling, or delivery | Route to the host layer | Do not generate a role Prompt |
-| The request is only for evaluation or regression design | Use evaluation mode | A test plan or record, not a role Prompt |
+| The request is only for evaluation or regression design | `audit` planning path | `EVALUATION_PLAN`, not a role Prompt |
 
 Do not rewrite an entire Prompt merely because the user says “optimize,” “humanize,” or “make it natural.” Diagnose existing failures first. Without failure evidence, perform a static review or clarify the real goal.
+
+If the user provides no role card, sample, or target condition to review, do not invent a static-review conclusion. Ask one highest-value question, such as what should be preserved or improved and whether a current Prompt or failure sample exists.
 
 ## Accepted Inputs
 
@@ -70,22 +75,26 @@ Ask only when a missing answer would materially change the result:
 - Unknown formatting could make the platform fail to display the output correctly;
 - User requirements directly conflict and cannot be resolved by priority, deletion, or preserved uncertainty.
 
+Ask at most one highest-impact question at a time. Record other missing items as `unknown` and continue with the conservative assumption that no extra capability exists; do not turn the runtime checklist into a questionnaire.
+
 When runtime conditions are unknown but the user explicitly wants a usable Prompt, you may produce a `PORTABLE_ROLE_PROMPT`. Briefly state that it has not been optimized for a specific model and host. Do not pretend runtime-conditioned compilation is complete.
 
 ## Authoring Assets
 
 Maintain these concepts internally. Do not expose all of them unless the user asks:
 
-- `ROLE_SPEC`: stable character semantics, including Canon, personality causality, relationship, expression, and boundaries. It is not automatically the deployment Prompt.
+- `ROLE_SPEC`: versioned stable character semantics, including Canon, personality causality, relationship, expression, and boundaries. It is not automatically the deployment Prompt.
 - `RUNTIME_PROFILE`: facts about the target model, host, input sources, tools, memory, media, rendering, actions, and unknowns.
-- `PRESERVATION_MAP`: `must_preserve`, `may_adapt`, `must_not_add`, and `unresolved`.
+- `PRESERVATION_MAP`: a versioned preservation map used when rewriting an accepted design, containing `must_preserve`, `may_adapt`, `must_not_add`, and `unresolved`.
 - `EVIDENCE_RECORD`: redacted failure sample, runtime conditions, expected behavior, observed behavior, and evidence strength.
 - `PORTABLE_ROLE_PROMPT`: a build artifact not bound to a known runtime profile; it may only be used as the single temporary injected Prompt.
 - `FINAL_ROLE_PROMPT`: the runtime-bound build artifact and the only role Prompt for the target deployment.
 - `TRIAGE_RESULT`: responsible layer, evidence strength, primary hypothesis, and next action.
+- `EVALUATION_PLAN`: a non-injectable test or regression plan produced by the `audit` planning path.
+- `BUILD_RECORD`: the minimum non-injectable record required for every Prompt build, including at least `role_spec_version`, `prompt_version`, `runtime_profile_id`, `preservation_map_version`, build mode, and validation status.
 - `NON_INJECTABLE_MANIFEST`: version, assumptions, changes, and capability gaps, provided only when explicitly requested.
 
-Both `PORTABLE_ROLE_PROMPT` and `FINAL_ROLE_PROMPT` are build artifacts, not the sole semantic source for later revisions. Return to `ROLE_SPEC`, `RUNTIME_PROFILE`, or real evidence and rebuild.
+Both `PORTABLE_ROLE_PROMPT` and `FINAL_ROLE_PROMPT` are build artifacts, not the sole semantic source for later revisions. Return to `ROLE_SPEC`, `RUNTIME_PROFILE`, or real evidence and rebuild. Persist `ROLE_SPEC` and `BUILD_RECORD` when the authoring environment can store files or state. If it cannot, provide the minimum `BUILD_RECORD` as a separate non-injectable attachment.
 
 ## Shared Principles
 
@@ -155,9 +164,9 @@ The character may disagree, show dislike, refuse, end a topic, or protect hersel
 
 ## `compile`: Runtime-Conditioned Compilation
 
-### 1. Build The Preservation Map First
+### 1. Build The Preservation Map When Needed
 
-Parse the trusted definition or existing card into:
+When rewriting an existing card, migrating an accepted design, or honoring explicitly locked content, first build:
 
 ```text
 must_preserve   accepted Canon, personality mechanisms, relationship position, distinctive expression, and red lines
@@ -167,6 +176,8 @@ unresolved      content that could reverse behavior and must be clarified or rem
 ```
 
 “Rewrite from scratch” means rebuilding final text from reliable semantic sources. It does not authorize discarding `must_preserve`.
+
+For a new character with no accepted prior text, do not manufacture an empty preservation document merely to complete a process. The accepted `ROLE_SPEC` is the semantic constraint.
 
 ### 2. Confirm Runtime Conditions
 
@@ -180,6 +191,12 @@ At minimum, identify:
 - sampling, context limits, and known human-observed failures.
 
 Do not turn `false`, `unknown`, or omitted capabilities into positive promises. The host owns exact schemas, full regexes, dynamic time, memory bodies, tool results, and platform task text; do not copy them into the role Prompt.
+
+The list above is an internal checklist, not a user questionnaire. Ask only when one unknown changes the artifact type, responsibility owner, or visible format. Keep other items `unknown` and omit the related capability.
+
+The runtime is `compile_ready` only when the exact target model and role-Prompt message layer are known, plain-text output is verified, every capability referenced by the final Prompt is `verified`, and unknowns that would reverse character behavior, source interpretation, or visible format are resolved. Unrelated capabilities may remain `unknown` and omitted.
+
+When the runtime is not `compile_ready`, either ask one highest-impact question or create a clearly unconditioned `PORTABLE_ROLE_PROMPT`. Do not label the result `FINAL_ROLE_PROMPT`.
 
 ### 3. Absorb Only Minimum Platform Semantics
 
@@ -204,6 +221,8 @@ Let personality and relationship determine:
 - which intimacy, commitments, and relationship changes require sustained evidence.
 
 The user message is the main interaction input, not a task checklist that must be exhaustively completed. The character may perform only the one send action she would genuinely choose now.
+
+“One send action” is not a one-sentence, short-reply, or single-bubble limit. Clear, important topics that the character genuinely wants to discuss may receive a naturally complete response.
 
 ### 5. Suppress Visible-Delivery Bias
 
@@ -271,6 +290,8 @@ Record:
 
 Do not substitute “it feels weird” or “not human enough” for evidence. Translate the feeling into observable behavior such as restatement, unsupported completion, relationship promises, repeated laughter, mechanical bubbles, or assistant voice after tools.
 
+When evidence is incomplete, still return a provisional `TRIAGE_RESULT` with an evidence level and request only the one additional fact that best distinguishes the candidate causes. Do not require a complete environment inventory before giving an initial diagnosis.
+
 ### 2. Classify The Responsible Layer
 
 Use:
@@ -293,7 +314,7 @@ Use:
 - Resolve `preference_mismatch` by realigning the target with the user.
 - For `insufficient_evidence`, request only the smallest additional evidence needed.
 
-Return `TRIAGE_RESULT` by default. Do not rewrite the entire Prompt in the same turn before attribution. When evidence is sufficient and the user asks for a fix, change only the problem supported by one primary hypothesis per iteration.
+When the user asks only for diagnosis, return `TRIAGE_RESULT`. When the user explicitly asks for a fix and evidence sufficiently supports `definition_fault` or `compilation_fault`, internally complete `audit -> define/compile -> rebuild`, return the corresponding new main build artifact, and retain `BUILD_RECORD`. For host, model, sampling, preference, or insufficient-evidence causes, still return `TRIAGE_RESULT`. Change only the problem supported by one primary hypothesis per iteration.
 
 ## Output Contract
 
@@ -303,11 +324,15 @@ Return only the main artifact needed by the current request:
 - `PORTABLE_ROLE_PROMPT` when the user wants a usable Prompt but runtime conditions are not fixed;
 - `FINAL_ROLE_PROMPT` after runtime-conditioned compilation;
 - `TRIAGE_RESULT` when the user supplies a failure and asks for diagnosis;
-- a test plan when the user only asks for evaluation or regression design.
+- `EVALUATION_PLAN` when the user only asks for evaluation or regression design.
+
+For host-only implementation questions, give a normal boundary response and handoff checklist rather than inventing another authoring Prompt asset.
 
 Do not output internal analysis, intermediate representations, change logs, test plans, or multiple candidate Prompts unless the user explicitly requests them.
 
 When requested, provide a separate `NON_INJECTABLE_MANIFEST` clearly marked “do not inject into the target model.” Keep it separate from any injectable Prompt.
+
+Every `PORTABLE_ROLE_PROMPT` or `FINAL_ROLE_PROMPT` build must retain `BUILD_RECORD`. It is not a second Prompt. Save it silently in a persistent workspace, or provide it as a separate minimal non-injectable attachment in a chat-only environment.
 
 The final Prompt body must not contain:
 
@@ -323,6 +348,7 @@ Before delivery, confirm:
 
 - routing matches what the user actually wants to receive;
 - the target deployment has one injected Prompt and portable/final versions are not combined;
+- `ROLE_SPEC` is versioned and the Prompt build has a recoverable `BUILD_RECORD`;
 - role definition, runtime facts, and failure evidence are not mixed into one source;
 - `must_preserve` was not changed without evidence and `must_not_add` was not violated;
 - what the character notices, answers, skips, or closes follows from personality and relationship;

@@ -1,6 +1,6 @@
 # Role Prompt Authoring Skill
 
-Status: `2.0.0-draft.1`, local pre-release, 2026-09-02.
+Status: `2.0.0-draft.2`, specification revision `2026-09-02.2`, local pre-release.
 
 ## Choose One File
 
@@ -25,6 +25,6 @@ The files are semantic counterparts. Provide one complete file to the model resp
 
 ## Output Rule
 
-The writer should expose only the main artifact requested by the user. Internal assets and manifests are optional non-injectable materials. A target deployment must contain exactly one role Prompt.
+The writer should expose only the main artifact requested by the user. A portable or final build must also retain a minimal non-injectable `BUILD_RECORD`; it is provenance, not a second Prompt. A target deployment must contain exactly one role Prompt.
 
 See `../../docs/` for maintainer-facing architecture, contracts, runtime profiles, evaluation, and migration guidance.
