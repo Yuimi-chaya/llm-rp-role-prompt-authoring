@@ -2,7 +2,7 @@
 
 Status: current shared protocol, 2026-09-02.
 
-Specification revision: `2026-09-02.3`.
+Specification revision: `2026-09-02.4`.
 
 ## Purpose
 
@@ -27,6 +27,8 @@ Review `ROLE_SPEC` without requiring a target platform:
 Failure returns to `define`.
 
 When a user supplies an existing card without a runtime failure and asks only for review or optimization, use the `audit` static path and return `TRIAGE_RESULT` with `evidence_basis: static`. Revise only when the user asks for a fix and the static evidence identifies a Prompt-owned defect.
+
+The corresponding static `EVIDENCE_RECORD` identifies the reviewed subject by reference, version, and hash. It uses `observed_behavior: none` and `reproduction: not-applicable` instead of inventing runtime evidence.
 
 ### 2. Portable Build Review
 

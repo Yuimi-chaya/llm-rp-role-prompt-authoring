@@ -2,7 +2,7 @@
 
 Status: current public architecture, 2026-09-02.
 
-Specification revision: `2026-09-02.3`.
+Specification revision: `2026-09-02.4`.
 
 ## Scope
 

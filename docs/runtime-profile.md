@@ -2,7 +2,7 @@
 
 Status: current public contract, 2026-09-02.
 
-Specification revision: `2026-09-02.3`.
+Specification revision: `2026-09-02.4`.
 
 ## Purpose
 
@@ -33,6 +33,7 @@ status: "draft | verified | superseded"
 updated_at: "<ISO date>"
 
 target_model:
+  status: unknown
   provider: "unknown"
   model: "unknown"
   version: "unknown"
@@ -41,6 +42,7 @@ target_model:
   evidence_refs: []
 
 sampling:
+  status: unknown
   temperature: "unknown"
   top_p: "unknown"
   seed: "unknown"
@@ -48,6 +50,7 @@ sampling:
   evidence_refs: []
 
 host:
+  status: unknown
   name: "unknown"
   version: "unknown"
   adapter: "unknown"
@@ -215,11 +218,12 @@ Materials in the current message. Attribution, speaker, action direction, and ob
 
 Derive `compile_ready: true` only when:
 
-1. The exact target model and the message layer containing the role Prompt are known.
-2. Immediate plain-text output is `verified` with evidence.
-3. Every runtime fact, source marker, message-hierarchy fact, rendering rule, security fact, or capability the final Prompt will absorb is `verified` with a resolvable evidence reference.
-4. Unknowns that would reverse character behavior, source interpretation, injection ownership, or visible formatting are resolved.
-5. The remaining `unknown` capabilities are irrelevant to the generated Prompt and will be omitted.
+1. The exact target model is `verified` with resolvable evidence.
+2. The message layer containing the role Prompt and the actual injection order that affects compilation are `verified` with resolvable evidence.
+3. Immediate plain-text output is `verified` with evidence.
+4. Every runtime fact, source marker, rendering rule, security fact, or capability that affects compilation decisions or enters the final Prompt is `verified` with a resolvable evidence reference.
+5. Unknowns that would reverse character behavior, source interpretation, injection ownership, or visible formatting are resolved.
+6. The remaining `unknown` items are irrelevant to the generated Prompt and will be omitted.
 
 Do not require every field in the profile to be verified. Readiness is scoped to the behavior the final Prompt actually uses.
 

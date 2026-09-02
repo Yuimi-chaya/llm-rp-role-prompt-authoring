@@ -1,8 +1,8 @@
 # Direct-Message Role Prompt Authoring Skill
 
-Version: `2.0.0-draft.3`
+Version: `2.0.0-draft.4`
 
-Specification revision: `2026-09-02.3`
+Specification revision: `2026-09-02.4`
 
 ## Purpose And Position
 
@@ -195,7 +195,7 @@ Do not turn `false`, `unknown`, or omitted capabilities into positive promises. 
 
 The list above is an internal checklist, not a user questionnaire. Ask only when one unknown changes the artifact type, responsibility owner, or visible format. Keep other items `unknown` and omit the related capability.
 
-The runtime is `compile_ready` only when the exact target model and role-Prompt message layer are known, plain-text output is verified, every runtime fact, source marker, message-hierarchy fact, rendering rule, and capability absorbed by the final Prompt is `verified` with a resolvable evidence reference, and unknowns that would reverse character behavior, source interpretation, or visible format are resolved. Unrelated items may remain `unknown` and omitted.
+The runtime is `compile_ready` only when the exact target model, role-Prompt message layer, and actual injection order that affects compilation are `verified` with resolvable evidence; plain-text output is verified; every runtime fact, source marker, rendering rule, and capability that affects compilation decisions or enters the final Prompt is verified; and unknowns that would reverse character behavior, source interpretation, or visible format are resolved. Unrelated items may remain `unknown` and omitted.
 
 When the runtime is not `compile_ready`, either ask one highest-impact question or create a clearly unconditioned `PORTABLE_ROLE_PROMPT`. Do not label the result `FINAL_ROLE_PROMPT`.
 
@@ -281,13 +281,15 @@ For models with weaker instruction following or greater state contamination, red
 
 ### 1. Build The Evidence Record
 
-Record:
+For a real runtime failure, record:
 
 - exact model, provider, host, injection, tools, memory, media, rendering, and sampling conditions;
 - the actual user input and context visible to the target model;
 - expected behavior, observed behavior, and the observable failure;
 - whether it reproduces across independent new sessions;
 - the one primary hypothesis to test in this iteration.
+
+For a static review of an existing card, do not invent a runtime sample. Record `evidence_basis: static`, the reviewed file or text as `subject_ref`, its `subject_hash` and version, `observed_behavior: none`, and `reproduction: not-applicable`, followed by the observable static conflict, duplication, gap, or ownership violation.
 
 Do not substitute “it feels weird” or “not human enough” for evidence. Translate the feeling into observable behavior such as restatement, unsupported completion, relationship promises, repeated laughter, mechanical bubbles, or assistant voice after tools.
 

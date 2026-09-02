@@ -2,7 +2,7 @@
 
 Status: current public contract, 2026-09-02.
 
-Specification revision: `2026-09-02.3`.
+Specification revision: `2026-09-02.4`.
 
 ## Purpose
 
@@ -106,9 +106,12 @@ Recommended fields:
 
 ```yaml
 record_id: "<id>"
+evidence_basis: "runtime | static"
 role_version: "<ROLE_SPEC version>"
 prompt_version: "<portable or final version>"
 runtime_profile_id: "<id or unknown>"
+subject_ref: "<reviewed file, text id, or none>"
+subject_hash: "<hash or none>"
 conditions:
   model: "<exact model>"
   provider: "<provider/version>"
@@ -125,6 +128,8 @@ evidence_strength: "single-sample | suggestive | repeated | human-validated"
 primary_hypothesis: "<one hypothesis>"
 privacy_notes: []
 ```
+
+For static review, use `subject_ref` and `subject_hash`, set `observed_behavior: none`, and set `reproduction: not-applicable`. Runtime-only fields may be `none` when they are genuinely inapplicable. Do not invent chat evidence for a static finding.
 
 Do not store credentials, unnecessary personal data, or raw private chats when a minimal redacted excerpt is sufficient.
 
@@ -149,9 +154,9 @@ Use only when a `compile_ready` `RUNTIME_PROFILE` exists.
 
 `compile_ready` means:
 
-- the exact target model and role-Prompt message layer are known;
+- the exact target model, role-Prompt message layer, and actual injection order that affects compilation are `verified` with resolvable evidence;
 - immediate plain-text output is verified;
-- every runtime fact, source marker, message-hierarchy fact, rendering rule, security fact, or capability absorbed by the final Prompt is `verified` with a resolvable evidence reference;
+- every runtime fact, source marker, rendering rule, security fact, or capability that affects compilation decisions or enters the final Prompt is `verified` with a resolvable evidence reference;
 - unknowns that would reverse character behavior, source interpretation, or visible formatting are resolved;
 - unrelated capabilities may remain `unknown` and must be omitted.
 

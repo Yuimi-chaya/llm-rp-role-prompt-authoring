@@ -2,7 +2,7 @@
 
 Status: current migration guide, 2026-09-02.
 
-Specification revision: `2026-09-02.3`.
+Specification revision: `2026-09-02.4`.
 
 ## Historical Assets
 

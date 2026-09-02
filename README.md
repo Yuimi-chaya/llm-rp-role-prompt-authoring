@@ -97,7 +97,11 @@ Prompt 可以改变行为概率和减少冲突，但不能凭空提供：
 
 ## 发布状态与许可证
 
-当前没有 `LICENSE`。在仓库所有者选择适用于代码、文档、Prompt 和归档材料的许可证，并完成 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) 中的第三方内容、隐私、归档和所有者确认前，本仓库只是本地发布候选，不能宣称已经完成开源发布。可运行 `scripts/validate-release.ps1 -Mode Draft` 检查本地候选；`-Mode Release` 会在许可证、许可范围或发布复核未完成时失败。
+当前没有 `LICENSE`。在仓库所有者选择适用于代码、文档、Prompt 和归档材料的许可证，并完成 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) 中的第三方内容、隐私、归档和所有者确认前，本仓库只是本地发布候选，不能宣称已经完成开源发布。
+
+- `scripts/validate-release.ps1 -Mode Draft`：检查本地候选结构、内容、链接、归档哈希、敏感信息和双语一致性；许可证未定时只警告。
+- `scripts/validate-release.ps1 -Mode Release`：发布前门禁，要求状态为 `release-ready`、许可证与许可范围齐全、全部复核完成，同时保持 `published_at: null`。
+- `scripts/validate-release.ps1 -Mode Published`：真实发布后的审计，要求状态为 `published`、记录实际发布日期，并清除对外文档中的预发布措辞。
 
 ## English Summary
 

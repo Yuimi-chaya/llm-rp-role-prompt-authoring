@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot),
-    [ValidateSet('Draft', 'Release')]
+    [ValidateSet('Draft', 'Release', 'Published')]
     [string]$Mode = 'Draft'
 )
 
@@ -66,8 +66,8 @@ $skillFiles = @(
 )
 
 $requiredSkillTokens = @(
-    '2.0.0-draft.3',
-    '2026-09-02.3',
+    '2.0.0-draft.4',
+    '2026-09-02.4',
     'define',
     'compile',
     'audit',
@@ -187,12 +187,12 @@ $licenseScopePresent = Test-Path -LiteralPath (Resolve-RepoPath 'LICENSE-SCOPE.m
 $publicationReviewPath = Resolve-RepoPath 'PUBLICATION-REVIEW.md'
 $publicationReviewPresent = Test-Path -LiteralPath $publicationReviewPath
 
-if ($Mode -eq 'Release') {
+if ($Mode -in @('Release', 'Published')) {
     if (-not $licensePresent) {
-        Add-Failure 'Release mode requires LICENSE.'
+        Add-Failure "$Mode mode requires LICENSE."
     }
     if (-not $licenseScopePresent) {
-        Add-Failure 'Release mode requires LICENSE-SCOPE.md covering documentation, Prompt files, scripts, and archive material.'
+        Add-Failure "$Mode mode requires LICENSE-SCOPE.md covering documentation, Prompt files, scripts, and archive material."
     }
     else {
         $licenseScope = Get-Content -Raw -LiteralPath (Resolve-RepoPath 'LICENSE-SCOPE.md')
@@ -204,30 +204,118 @@ if ($Mode -eq 'Release') {
     }
 
     if (-not $publicationReviewPresent) {
-        Add-Failure 'Release mode requires PUBLICATION-REVIEW.md.'
+        Add-Failure "$Mode mode requires PUBLICATION-REVIEW.md."
     }
     else {
         $review = Get-Content -Raw -LiteralPath $publicationReviewPath
-        $requiredReviewFields = [ordered]@{
-            publication_status = '(?m)^publication_status:\s*published\s*$'
-            published_at = '(?m)^published_at:\s*\d{4}-\d{2}-\d{2}\s*$'
-            license_scope_reviewed = '(?m)^license_scope_reviewed:\s*true\s*$'
-            third_party_reviewed = '(?m)^third_party_reviewed:\s*true\s*$'
-            privacy_reviewed = '(?m)^privacy_reviewed:\s*true\s*$'
-            archive_reviewed = '(?m)^archive_reviewed:\s*true\s*$'
-            owner_approval = '(?m)^owner_approval:\s*true\s*$'
+        $expectedStatus = if ($Mode -eq 'Release') { 'release-ready' } else { 'published' }
+        $reviewFieldNames = @(
+            'publication_status',
+            'reviewed_at',
+            'published_at',
+            'license_scope_reviewed',
+            'third_party_reviewed',
+            'privacy_reviewed',
+            'archive_reviewed',
+            'owner_approval'
+        )
+        $reviewValues = @{}
+
+        foreach ($fieldName in $reviewFieldNames) {
+            $fieldPattern = "(?m)^$([regex]::Escape($fieldName)):\s*(.*?)\s*$"
+            $fieldMatches = [regex]::Matches($review, $fieldPattern)
+            if ($fieldMatches.Count -ne 1) {
+                Add-Failure "PUBLICATION-REVIEW.md must contain exactly one $fieldName field; found $($fieldMatches.Count)."
+                continue
+            }
+            $reviewValues[$fieldName] = $fieldMatches[0].Groups[1].Value.Trim()
         }
-        foreach ($field in $requiredReviewFields.GetEnumerator()) {
-            if ($review -notmatch $field.Value) {
-                Add-Failure "PUBLICATION-REVIEW.md is not release-ready: $($field.Key)"
+
+        if ($reviewValues.ContainsKey('publication_status') -and $reviewValues.publication_status -ne $expectedStatus) {
+            Add-Failure "PUBLICATION-REVIEW.md publication_status must be $expectedStatus in $Mode mode."
+        }
+
+        if ($reviewValues.ContainsKey('reviewed_at')) {
+            $reviewedAt = [datetime]::MinValue
+            $validReviewedAt = [datetime]::TryParseExact(
+                $reviewValues.reviewed_at,
+                'yyyy-MM-dd',
+                [System.Globalization.CultureInfo]::InvariantCulture,
+                [System.Globalization.DateTimeStyles]::None,
+                [ref]$reviewedAt
+            )
+            if (-not $validReviewedAt -or $reviewedAt.Date -gt (Get-Date).Date) {
+                Add-Failure 'PUBLICATION-REVIEW.md reviewed_at must be a valid, non-future YYYY-MM-DD date.'
+            }
+        }
+
+        if ($reviewValues.ContainsKey('published_at')) {
+            if ($Mode -eq 'Release') {
+                if ($reviewValues.published_at -ne 'null') {
+                    Add-Failure 'PUBLICATION-REVIEW.md published_at must remain null in Release mode.'
+                }
+            }
+            else {
+                $publishedAt = [datetime]::MinValue
+                $validPublishedAt = [datetime]::TryParseExact(
+                    $reviewValues.published_at,
+                    'yyyy-MM-dd',
+                    [System.Globalization.CultureInfo]::InvariantCulture,
+                    [System.Globalization.DateTimeStyles]::None,
+                    [ref]$publishedAt
+                )
+                if (-not $validPublishedAt -or $publishedAt.Date -gt (Get-Date).Date) {
+                    Add-Failure 'PUBLICATION-REVIEW.md published_at must be a valid, non-future YYYY-MM-DD date in Published mode.'
+                }
+            }
+        }
+
+        foreach ($fieldName in @('license_scope_reviewed', 'third_party_reviewed', 'privacy_reviewed', 'archive_reviewed', 'owner_approval')) {
+            if ($reviewValues.ContainsKey($fieldName) -and $reviewValues[$fieldName] -ne 'true') {
+                Add-Failure "PUBLICATION-REVIEW.md $fieldName must be true in $Mode mode."
             }
         }
     }
 
-    $releaseStatusText = (Get-Content -Raw -LiteralPath (Resolve-RepoPath 'README.md')) + "`n" + (Get-Content -Raw -LiteralPath (Resolve-RepoPath 'NOTICE.md'))
-    foreach ($pattern in @('本地预发布', '尚未公开', '(?i)local pre-release', '(?i)local draft', '(?i)no license has been selected')) {
+    $reviewDecision = ''
+    if ($publicationReviewPresent) {
+        $reviewText = Get-Content -Raw -LiteralPath $publicationReviewPath
+        $decisionMatch = [regex]::Match($reviewText, '(?ms)^## Current Decision\s*\r?\n(?<body>.*?)(?=^##\s|\z)')
+        if ($decisionMatch.Success) {
+            $reviewDecision = $decisionMatch.Groups['body'].Value
+        }
+        else {
+            Add-Failure 'PUBLICATION-REVIEW.md must contain a Current Decision section.'
+        }
+    }
+
+    $releaseStatusText = @(
+        Get-Content -Raw -LiteralPath (Resolve-RepoPath 'README.md')
+        Get-Content -Raw -LiteralPath (Resolve-RepoPath 'NOTICE.md')
+        Get-Content -Raw -LiteralPath (Resolve-RepoPath 'skills/role-prompt-authoring/README.md')
+        $reviewDecision
+    ) -join "`n"
+    $stalePatterns = @(
+        '本地预发布草案',
+        '尚未选择许可证',
+        '当前没有 `?LICENSE`?',
+        '(?i)local draft',
+        '(?i)no license has been selected',
+        '(?i)public release is blocked'
+    )
+    if ($Mode -eq 'Published') {
+        $stalePatterns += @(
+            '本地预发布',
+            '尚未公开',
+            '(?i)local pre-release',
+            '(?i)pre-publication notice',
+            '(?i)not yet published',
+            '(?i)has not been published'
+        )
+    }
+    foreach ($pattern in $stalePatterns) {
         if ($releaseStatusText -match $pattern) {
-            Add-Failure "Release-facing README/NOTICE still contains draft-state text matching: $pattern"
+            Add-Failure "$Mode-facing README/NOTICE still contains stale state text matching: $pattern"
         }
     }
 }
