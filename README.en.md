@@ -52,7 +52,9 @@ Those ideas remain useful, and Persona Definition v1 remains available as a trac
 
 ## What HDSI Inspired
 
-HDS Interlude (HDSI) demonstrates a different path from making the role card longer. The host owns trustworthy time, current events, state, memory, intent, actions, scheduling, and delivery. The main model decides what the character does now, whether to reply, and what becomes visible only within those constrained facts.
+HDS Interlude (HDSI) does not work well merely because its persona is more detailed. It is a standalone, layered runtime. What looks like a short exchange to the user may internally pass through message batching and interruption handling, authoritative event and clock anchoring, scene, relationship, and memory retrieval, and then a main narrative-model pass that writes the elapsed interval, processes the current event, and decides whether to reply, remain silent, or delay. When needed, responsibilities such as vision, memory compression, affect tracking, and schedule review can use separate side-model calls before the host persists state, schedules actions, and performs real delivery.
+
+HDSI's visible naturalness is therefore a **framework effect produced by layered state, the main model and on-demand side models, and host orchestration**, not a single role Prompt performing well in isolation. The main model does not need to prove inside every visible reply that it understood the whole context, maintained long-term facts, interpreted media, arranged future actions, and completed emotional support. Complex work can remain inside the system while the user sees only the interaction that was actually selected for sending.
 
 This repository borrows the **separation of responsibilities and visibility**:
 
@@ -62,7 +64,9 @@ This repository borrows the **separation of responsibilities and visibility**:
 - the model may understand a great deal internally while exposing only what the character would actually send now;
 - time, silence, delay, proactive sending, tool execution, and successful delivery must be implemented by the host.
 
-This repository does not port HDSI code, fixed Prompts, fields, JSON protocols, stage workflows, or persistent-world simulation, and it does not provide HDSI's runtime guarantees. The scope here is narrower: when the common single-model, single-role-Prompt, general-chat-host setup remains fixed, translate the transferable cognitive boundaries into authoring-time compilation principles.
+HDSI, however, is a complete framework that must be deployed independently, while most current LLM RP environments still expose one main model, one role Prompt, and a general chat host. This repository does not require users to reproduce HDSI, port its code, fixed Prompts, fields, JSON protocols, stage workflows, or persistent-world simulation, and it does not provide HDSI's runtime guarantees.
+
+The path here is narrower and more portable. With the model, host, and available actions held fixed, the Skill learns from HDSI's transferable separation mechanisms and compiles them into one coherent role Prompt. It primarily improves the enactment layer of a single main model by separating character definition from dynamic information, internal understanding from visible expression, the current event from historical continuation, and character motivation from task-style delivery. It cannot create side models, persistent state, trustworthy time, scheduling, or delivery capabilities, and one Prompt is not equivalent to reproducing HDSI.
 
 ## The Compile-Time “Performance Inside Performance” Metaphor
 
