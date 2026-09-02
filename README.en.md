@@ -4,7 +4,7 @@
 
 [简体中文](README.md) | [English](README.en.md)
 
-> Current status: `2.0.0-draft.4`, specification revision `2026-09-02.4`, `publication_status: release-ready`. This version is intentionally being published as a draft and does not claim to be stable `2.0.0`.
+> Current status: `2.0.0-draft.4`, specification revision `2026-09-02.4`, `publication_status: published`. This version was published as a public draft on 2026-09-02 and does not claim to be stable `2.0.0`.
 
 This repository defines an authoring method for realistic one-to-one direct-message role Prompts. It starts from a character request an ordinary user could naturally write, builds reusable character semantics, and, when the evidence threshold is met, compiles them for a specific model and host into the runtime's single injectable role Prompt.
 
@@ -221,7 +221,7 @@ The initial publication allowlist excludes real deployment Prompts, private chat
 
 This repository uses the [MIT License](LICENSE). It covers code, documentation, Prompts, Skills, tests, translations, and historical archives that the repository owner is authorized to license. Linked content, third-party material such as HDSI, project names, marks, character IP, user material, and content not stored here do not become MIT-licensed merely because they are mentioned. See [LICENSE-SCOPE.md](LICENSE-SCOPE.md) for the exact boundaries.
 
-`2.0.0-draft.4` is an intentionally public research draft, not stable `2.0.0`, and it has no demonstrated cross-model or cross-platform effect guarantee. The current machine-readable state is `release-ready`; after actual publication, [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) must record the publication date and pass the `Published` audit.
+`2.0.0-draft.4` is an intentionally public research draft, not stable `2.0.0`, and it has no demonstrated cross-model or cross-platform effect guarantee. See [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) for the machine-readable publication record and completed review evidence.
 
 - `scripts/validate-release.ps1 -Mode Draft` checks structure, links, archive hashes, sensitive material, license files, the Git allowlist, and bilingual consistency.
 - `scripts/validate-release.ps1 -Mode Release` is the pre-publication gate. It requires `release-ready`, complete license scope, completed reviews, and `published_at: null`.

@@ -1,6 +1,6 @@
 # Role Prompt Authoring Skill
 
-状态 / Status：`2.0.0-draft.4`，规范修订 / specification revision `2026-09-02.4`，发布就绪草案 / release-ready draft。该版本不宣称为稳定 `2.0.0` / this version does not claim to be stable `2.0.0`.
+状态 / Status：`2.0.0-draft.4`，规范修订 / specification revision `2026-09-02.4`，公开草案 / public draft。该版本不宣称为稳定 `2.0.0` / this version does not claim to be stable `2.0.0`.
 
 ## 简体中文
 
