@@ -1,4 +1,4 @@
-# Migration From Historical Authoring Skills
+# Historical Sources And Method Migration
 
 [简体中文](../zh-CN/migration.md) | [English](migration.md)
 
@@ -10,14 +10,16 @@ Specification revision: `2026-09-02.4`.
 
 The repository preserves two earlier bilingual methods under `archive/`:
 
-- `persona-definition-v1`: an end-to-end persona authoring method from 2026-08-25;
-- `private-chat-compilation-v0`: an experimental companion compiler from 2026-09-01.
+- [`persona-definition-v1`](../../archive/persona-definition-v1/README.md): a standalone freeze of the 2026-08-25 persona-authoring Skill embedded in a public Chinese blog article;
+- [`private-chat-compilation-v0`](../../archive/private-chat-compilation-v0/README.md): an experimental companion compiler from 2026-09-01.
 
 They are evidence and migration sources, not current alternatives. Do not load either archive together with the current Role Prompt Authoring Skill.
 
+Persona Definition v1 does not come from a separate legacy repository. Its Chinese body comes from the Skill embedded in the public article [《给 AstrBot 写人设提示词这件事,我踩过的一些坑》 (“Lessons From Writing Persona Prompts For AstrBot”)](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md). The archive README separately records the pinned source commit, file hashes, and the status of the paired English translation. The article remains maintained by the blog repository; this repository preserves only the reproducible Skill snapshot rather than copying the whole article.
+
 ## Why The Architecture Changed
 
-The earlier persona Skill covered character semantics, tool behavior, platform formatting, testing, and iterative repair in one document. The companion compiler later covered natural-language creation, personality derivation, runtime adaptation, private-chat execution, compression, and failure repair.
+Persona Definition v1 covered character semantics, tool behavior, platform formatting, testing, and iterative repair in one document. The companion compiler later covered natural-language creation, personality derivation, runtime adaptation, private-chat execution, compression, and failure repair.
 
 Both therefore matched requests such as “create a role Prompt” or “make this role card more natural.” Keeping them as two public Skills would create unstable routing, duplicated rules, and unclear ownership of testing and revision.
 

@@ -17,9 +17,9 @@ The project does not promise to make arbitrary models human, and it does not try
 - Authoring file meanings: [Artifact Contracts](docs/en/output-contracts.md)
 - Model and host facts: [Runtime Profile](docs/en/runtime-profile.md)
 - Diagnosis, testing, and stopping rules: [Evaluation, Triage, And Iteration](docs/en/evaluation-and-triage.md)
-- Migration from earlier methods: [Historical Migration](docs/en/migration.md)
+- Migration from earlier methods: [Historical Sources And Migration](docs/en/migration.md)
 - Bilingual documentation index: [docs/README.md](docs/README.md)
-- Historical sources and prototypes: [archive/README.md](archive/README.md)
+- Provenance, historical artifacts, and prototypes: [archive/README.md](archive/README.md)
 - Publication gates: [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md)
 
 ## Start With Three Layers
@@ -36,7 +36,9 @@ The authoring Skill sits outside these runtime layers. It maintains `ROLE_SPEC`,
 
 ## Where The Work Started
 
-The original article and Skill described a general role-card editing practice:
+The project did not begin in a separate legacy repository. It began with the public Chinese blog article [《给 AstrBot 写人设提示词这件事,我踩过的一些坑》 (“Lessons From Writing Persona Prompts For AstrBot”)](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md) and the persona-authoring Skill embedded in that article. This repository preserves the Chinese Skill body as the standalone historical artifact [Persona Definition v1](archive/persona-definition-v1/README.md); its pinned source revision, file hashes, and the status of the paired English translation are recorded in the archive metadata.
+
+That earlier method described a general role-card editing practice:
 
 - More Prompt text does not necessarily improve a character; background detail can dilute core behavior.
 - Neutral labels such as cute, gentle, or tsundere do not determine behavior. Personality needs causes, value ordering, tensions, and defenses.
@@ -45,7 +47,7 @@ The original article and Skill described a general role-card editing practice:
 - Role cards should be tested in the real environment under controlled variables, then revised in small steps for ambiguity and conflict.
 - Positive examples can become repeated catchphrases; failure structures are often safer than answer keys.
 
-Those ideas remain useful and are preserved byte-for-byte under [persona-definition-v1](archive/persona-definition-v1/README.md). But the method put character definition, platform capability, output format, testing, and repair into one document. It helped make a character clearer without fully answering a second question: why can a strong model still look like it is trying too hard to perform, prove itself, and complete every conversational turn after the role card reaches a real chat platform?
+Those ideas remain useful, and Persona Definition v1 remains available as a traceable historical artifact rather than a current entry point. The method put character definition, platform capability, output format, testing, and repair into one document. It helped make a character clearer without fully answering a second question: why can a strong model still look like it is trying too hard to perform, prove itself, and complete every conversational turn after the role card reaches a real chat platform?
 
 ## What HDSI Inspired
 

@@ -17,9 +17,9 @@
 - 查看作者侧文件含义：[产物契约](docs/zh-CN/output-contracts.md)
 - 记录真实模型与平台条件：[运行条件档案](docs/zh-CN/runtime-profile.md)
 - 诊断、测试和停止加规则：[评测、归因与迭代](docs/zh-CN/evaluation-and-triage.md)
-- 从旧 Skill 迁移：[历史方法迁移](docs/zh-CN/migration.md)
+- 从早期方法迁移：[历史来源与方法迁移](docs/zh-CN/migration.md)
 - 中英文文档总索引：[docs/README.md](docs/README.md)
-- 历史原件与实验原型（双语索引）：[archive/README.md](archive/README.md)
+- 来源、历史原件与实验原型（双语索引）：[archive/README.md](archive/README.md)
 - 当前发布门禁（机器可读英文记录）：[PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md)
 
 ## 先分清三层
@@ -36,7 +36,9 @@
 
 ## 我们从哪里开始
 
-最初的文章与旧版 Skill 讨论的是一套泛化角色卡编辑经验：
+本项目的前身不是另一个独立的旧版仓库，而是公开博客文章[《给 AstrBot 写人设提示词这件事,我踩过的一些坑》](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md)及其中内嵌的角色卡作者 Skill。本仓库把那份中文 Skill 正文独立冻结为[早期角色定义方法 Persona Definition v1](archive/persona-definition-v1/README.md)；固定来源版本、文件哈希以及英文配套译本的性质都记录在归档说明中。
+
+这套早期方法讨论的是一组泛化角色卡编辑经验：
 
 - 提示词变长不一定让角色更好，背景信息可能稀释核心行为；
 - “可爱”“温柔”“傲娇”这类中性标签不足以决定实际表现，需要写清人格因果、价值排序、矛盾和防御方式；
@@ -45,7 +47,7 @@
 - 角色卡需要在真实环境中做控制变量测试，再根据描述歧义和规则冲突小步修改；
 - 正例容易变成被复读的固定台词，失败结构往往比标准答案更适合长期迭代。
 
-这些观点仍然有效，并以原字节保存在 [persona-definition-v1](archive/persona-definition-v1/README.md) 中。但它把人物定义、平台能力、输出格式、测试和返工都放进一份方法里。它能帮助“把角色写清楚”，却没有充分回答另一个问题：当角色卡进入真实聊天平台后，为什么一个已经很强的模型仍会显得像在努力扮演、努力证明、努力把每轮说完整？
+这些观点仍然有效，Persona Definition v1 也继续作为可追溯的历史原件保留，但不再是当前入口。它把人物定义、平台能力、输出格式、测试和返工都放进一份方法里，能帮助“把角色写清楚”，却没有充分回答另一个问题：当角色卡进入真实聊天平台后，为什么一个已经很强的模型仍会显得像在努力扮演、努力证明、努力把每轮说完整？
 
 ## HDSI 带来的启发
 

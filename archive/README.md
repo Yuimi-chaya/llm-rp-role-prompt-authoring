@@ -8,10 +8,12 @@
 
 内容：
 
-- `persona-definition-v1/`：2026-08-25 的泛化角色卡作者方法，曾用于早期评测；
-- `private-chat-compilation-v0/`：2026-09-01 的实验性 companion 编译器，为当前统一架构提供了研究依据。
+- [`persona-definition-v1/`](persona-definition-v1/README.md)：公开博客文章内嵌的 2026-08-25 版本角色卡作者 Skill 的独立冻结归档，曾用于早期评测；
+- [`private-chat-compilation-v0/`](private-chat-compilation-v0/README.md)：2026-09-01 的实验性 companion 编译器，为当前统一架构提供了研究依据。
 
-原 Skill Markdown 从私有研究源按字节复制。各目录 README 是发布元数据，不属于历史原件正文。
+Persona Definition v1 的中文正文可追溯到公开文章[《给 AstrBot 写人设提示词这件事,我踩过的一些坑》](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md)。固定来源提交、正文对应关系、英文译本性质和文件哈希见其目录 README。
+
+历史 Skill Markdown 从研究源按字节冻结；各目录 README 只补充来源、发布元数据和当前状态，不属于历史原件正文。
 
 ## English
 
@@ -21,7 +23,9 @@ Nothing under `archive/` is a current Skill entry point. Do not combine archived
 
 Contents:
 
-- `persona-definition-v1/`: the 2026-08-25 generalized persona authoring method used in earlier evaluations;
-- `private-chat-compilation-v0/`: the 2026-09-01 experimental companion compiler that informed the current unified architecture.
+- [`persona-definition-v1/`](persona-definition-v1/README.md): a standalone freeze of the 2026-08-25 persona-authoring Skill embedded in a public Chinese blog article and used in earlier evaluations;
+- [`private-chat-compilation-v0/`](private-chat-compilation-v0/README.md): the 2026-09-01 experimental companion compiler that informed the current unified architecture.
 
-The original Skill Markdown files are copied byte-for-byte from the private research source. Archive README files are publication metadata and are not part of the original artifacts.
+The Chinese Persona Definition v1 body traces to the public article [《给 AstrBot 写人设提示词这件事,我踩过的一些坑》 (“Lessons From Writing Persona Prompts For AstrBot”)](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md). Its directory README records the pinned source commit, body relationship, English translation status, and file hashes.
+
+Historical Skill Markdown files are byte-frozen from the research source. Archive README files add provenance, publication metadata, and current status; they are not part of the original artifact bodies.

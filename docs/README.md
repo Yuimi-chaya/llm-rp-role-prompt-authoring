@@ -12,7 +12,7 @@
 | 作者侧产物、注入与生命周期 | [产物契约](zh-CN/output-contracts.md) | [Artifact Contracts](en/output-contracts.md) |
 | 目标模型、平台能力与证据门槛 | [运行条件档案](zh-CN/runtime-profile.md) | [Runtime Profile](en/runtime-profile.md) |
 | 静态审查、真人测试、归因与停止条件 | [评测、归因与迭代](zh-CN/evaluation-and-triage.md) | [Evaluation, Triage, And Iteration](en/evaluation-and-triage.md) |
-| 从旧 v1 与 companion v0 迁移 | [历史方法迁移](zh-CN/migration.md) | [Historical Migration](en/migration.md) |
+| 早期文章、v1 归档与 companion v0 的来源和迁移 | [历史来源与方法迁移](zh-CN/migration.md) | [Historical Sources And Migration](en/migration.md) |
 
 当前可执行入口不在 `docs/` 中：
 

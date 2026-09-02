@@ -221,11 +221,11 @@ foreach ($pair in $bilingualDocumentPairs) {
 $readmeRequirements = @(
     @{
         path = 'README.md'
-        tokens = @('模型层', 'Prompt 层', '宿主层', 'HDS Interlude', '展示性交付偏置', 'ROLE_SPEC', 'PORTABLE_ROLE_PROMPT', 'FINAL_ROLE_PROMPT')
+        tokens = @('模型层', 'Prompt 层', '宿主层', 'HDS Interlude', '展示性交付偏置', 'ROLE_SPEC', 'PORTABLE_ROLE_PROMPT', 'FINAL_ROLE_PROMPT', 'Persona Definition v1', 'astrbot-roleplay-persona-notes.md')
     },
     @{
         path = 'README.en.md'
-        tokens = @('Model', 'Prompt', 'Host', 'HDS Interlude', 'Visible-Delivery Bias', 'ROLE_SPEC', 'PORTABLE_ROLE_PROMPT', 'FINAL_ROLE_PROMPT')
+        tokens = @('Model', 'Prompt', 'Host', 'HDS Interlude', 'Visible-Delivery Bias', 'ROLE_SPEC', 'PORTABLE_ROLE_PROMPT', 'FINAL_ROLE_PROMPT', 'Persona Definition v1', 'astrbot-roleplay-persona-notes.md')
     }
 )
 
@@ -240,6 +240,41 @@ foreach ($requirement in $readmeRequirements) {
     $mermaidBlocks = [regex]::Matches($readmeContent, '(?m)^```mermaid\s*$').Count
     if ($mermaidBlocks -ne 2) {
         Add-Failure "$($requirement.path) must contain exactly two Mermaid flowcharts; found $mermaidBlocks."
+    }
+}
+
+$provenanceRequirements = @(
+    @{
+        path = 'archive/persona-definition-v1/README.md'
+        tokens = @(
+            'superseded-as-entry',
+            '9ddf51215ec7bbcf86d3f43eaf682543a4ced6ce',
+            'astrbot-roleplay-persona-notes.md',
+            '7FE9D99281972A1C427E8119DCA93BDFB1F070662150B7E82EBFC3F2BE35A350',
+            '167E18B6DE848BDD7A8F9485A8C8330D4B57C9719847A56917AD62263981CE41'
+        )
+    },
+    @{
+        path = 'docs/zh-CN/migration.md'
+        tokens = @('Persona Definition v1', 'astrbot-roleplay-persona-notes.md', '不复制整篇文章')
+    },
+    @{
+        path = 'docs/en/migration.md'
+        tokens = @('Persona Definition v1', 'astrbot-roleplay-persona-notes.md', 'rather than copying the whole article')
+    }
+)
+
+foreach ($requirement in $provenanceRequirements) {
+    $path = Resolve-RepoPath $requirement.path
+    if (-not (Test-Path -LiteralPath $path)) {
+        Add-Failure "Missing provenance file: $($requirement.path)"
+        continue
+    }
+    $content = Get-Content -Raw -LiteralPath $path
+    foreach ($token in $requirement.tokens) {
+        if (-not $content.Contains($token)) {
+            Add-Failure "$($requirement.path) is missing provenance token: $token"
+        }
     }
 }
 

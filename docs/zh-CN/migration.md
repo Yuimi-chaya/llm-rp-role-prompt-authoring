@@ -1,4 +1,4 @@
-# 从历史作者 Skill 迁移
+# 历史来源与方法迁移
 
 [简体中文](migration.md) | [English](../en/migration.md)
 
@@ -10,10 +10,12 @@
 
 仓库在 `archive/` 下保存两套较早的双语方法：
 
-- `persona-definition-v1`：2026-08-25 的端到端角色卡作者方法；
-- `private-chat-compilation-v0`：2026-09-01 的实验性 companion 编译器。
+- [`persona-definition-v1`](../../archive/persona-definition-v1/README.md)：公开博客文章内嵌的 2026-08-25 版本角色卡作者 Skill 的独立冻结归档；
+- [`private-chat-compilation-v0`](../../archive/private-chat-compilation-v0/README.md)：2026-09-01 的实验性 companion 编译器。
 
 它们是证据和迁移来源，不是当前可选入口。不要把任一归档与当前 Role Prompt Authoring Skill 同时加载。
+
+Persona Definition v1 并不来自另一个独立的旧仓库。它的中文正文源于公开文章[《给 AstrBot 写人设提示词这件事,我踩过的一些坑》](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md)中的内嵌 Skill；归档 README 另外记录了固定来源提交、文件哈希和英文配套译本的性质。文章继续由博客仓库维护，本仓库只保存可复现的 Skill 快照，不复制整篇文章。
 
 ## 为什么修改架构
 
@@ -29,7 +31,7 @@
   -> 修改前先审查证据
 ```
 
-## persona-definition v1 映射
+## Persona Definition v1 映射
 
 | v1 内容 | 当前所有者 |
 | --- | --- |
