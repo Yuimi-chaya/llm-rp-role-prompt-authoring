@@ -1,5 +1,7 @@
 # Authoring Artifact Contracts
 
+[简体中文](../zh-CN/output-contracts.md) | [English](output-contracts.md)
+
 Status: current public contract, 2026-09-02.
 
 Specification revision: `2026-09-02.4`.
@@ -168,6 +170,8 @@ Requirements:
 - Does not duplicate exact schemas, regexes, dynamic context, or higher-level platform injection.
 - Contains no authoring workflow, evaluation rubric, research terminology, or unsupported capability.
 - Is the target deployment's only role Prompt.
+
+`FINAL` means the single final artifact of this build for the verified runtime conditions. It does not mean human-validated or unconditionally production-ready.
 
 ## `TRIAGE_RESULT`
 

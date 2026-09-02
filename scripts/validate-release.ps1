@@ -32,17 +32,24 @@ function Resolve-RepoPath {
 
 $requiredFiles = @(
     'README.md',
+    'README.en.md',
     'NOTICE.md',
     'PUBLICATION-REVIEW.md',
     'skills/README.md',
     'skills/role-prompt-authoring/README.md',
     'skills/role-prompt-authoring/role-prompt-authoring-skill.zh-CN.md',
     'skills/role-prompt-authoring/role-prompt-authoring-skill.en.md',
-    'docs/architecture.md',
-    'docs/output-contracts.md',
-    'docs/runtime-profile.md',
-    'docs/evaluation-and-triage.md',
-    'docs/migration.md',
+    'docs/README.md',
+    'docs/zh-CN/architecture.md',
+    'docs/zh-CN/output-contracts.md',
+    'docs/zh-CN/runtime-profile.md',
+    'docs/zh-CN/evaluation-and-triage.md',
+    'docs/zh-CN/migration.md',
+    'docs/en/architecture.md',
+    'docs/en/output-contracts.md',
+    'docs/en/runtime-profile.md',
+    'docs/en/evaluation-and-triage.md',
+    'docs/en/migration.md',
     'archive/README.md',
     'archive/persona-definition-v1/README.md',
     'archive/persona-definition-v1/immersive-role-prompt-engineering-skill.zh-CN.md',
@@ -182,6 +189,60 @@ if ($zhHeadings.Count -ne $enHeadings.Count) {
     Add-Failure "Bilingual Skill heading count mismatch: zh=$($zhHeadings.Count), en=$($enHeadings.Count)"
 }
 
+$bilingualDocumentPairs = @(
+    @{ zh = 'README.md'; en = 'README.en.md'; label = 'root README' },
+    @{ zh = 'docs/zh-CN/architecture.md'; en = 'docs/en/architecture.md'; label = 'architecture' },
+    @{ zh = 'docs/zh-CN/output-contracts.md'; en = 'docs/en/output-contracts.md'; label = 'output contracts' },
+    @{ zh = 'docs/zh-CN/runtime-profile.md'; en = 'docs/en/runtime-profile.md'; label = 'runtime profile' },
+    @{ zh = 'docs/zh-CN/evaluation-and-triage.md'; en = 'docs/en/evaluation-and-triage.md'; label = 'evaluation and triage' },
+    @{ zh = 'docs/zh-CN/migration.md'; en = 'docs/en/migration.md'; label = 'migration' }
+)
+
+foreach ($pair in $bilingualDocumentPairs) {
+    $zhPath = Resolve-RepoPath $pair.zh
+    $enPath = Resolve-RepoPath $pair.en
+    if (-not (Test-Path -LiteralPath $zhPath) -or -not (Test-Path -LiteralPath $enPath)) {
+        continue
+    }
+    $pairZhHeadings = @(Get-Content -LiteralPath $zhPath | Where-Object { $_ -match '^#{1,3}\s' })
+    $pairEnHeadings = @(Get-Content -LiteralPath $enPath | Where-Object { $_ -match '^#{1,3}\s' })
+    if ($pairZhHeadings.Count -ne $pairEnHeadings.Count) {
+        Add-Failure "Bilingual document heading count mismatch for $($pair.label): zh=$($pairZhHeadings.Count), en=$($pairEnHeadings.Count)"
+    }
+
+    foreach ($path in @($zhPath, $enPath)) {
+        $pairContent = Get-Content -Raw -LiteralPath $path
+        if (-not $pairContent.Contains('2026-09-02.4')) {
+            Add-Failure "Bilingual document is missing specification revision 2026-09-02.4: $($path.Substring($root.Length + 1))"
+        }
+    }
+}
+
+$readmeRequirements = @(
+    @{
+        path = 'README.md'
+        tokens = @('模型层', 'Prompt 层', '宿主层', 'HDS Interlude', '展示性交付偏置', 'ROLE_SPEC', 'PORTABLE_ROLE_PROMPT', 'FINAL_ROLE_PROMPT')
+    },
+    @{
+        path = 'README.en.md'
+        tokens = @('Model', 'Prompt', 'Host', 'HDS Interlude', 'Visible-Delivery Bias', 'ROLE_SPEC', 'PORTABLE_ROLE_PROMPT', 'FINAL_ROLE_PROMPT')
+    }
+)
+
+foreach ($requirement in $readmeRequirements) {
+    $readmePath = Resolve-RepoPath $requirement.path
+    $readmeContent = Get-Content -Raw -LiteralPath $readmePath
+    foreach ($token in $requirement.tokens) {
+        if (-not $readmeContent.Contains($token)) {
+            Add-Failure "$($requirement.path) is missing required narrative token: $token"
+        }
+    }
+    $mermaidBlocks = [regex]::Matches($readmeContent, '(?m)^```mermaid\s*$').Count
+    if ($mermaidBlocks -ne 2) {
+        Add-Failure "$($requirement.path) must contain exactly two Mermaid flowcharts; found $mermaidBlocks."
+    }
+}
+
 $licensePresent = Test-Path -LiteralPath (Resolve-RepoPath 'LICENSE')
 $licenseScopePresent = Test-Path -LiteralPath (Resolve-RepoPath 'LICENSE-SCOPE.md')
 $publicationReviewPath = Resolve-RepoPath 'PUBLICATION-REVIEW.md'
@@ -291,6 +352,7 @@ if ($Mode -in @('Release', 'Published')) {
 
     $releaseStatusText = @(
         Get-Content -Raw -LiteralPath (Resolve-RepoPath 'README.md')
+        Get-Content -Raw -LiteralPath (Resolve-RepoPath 'README.en.md')
         Get-Content -Raw -LiteralPath (Resolve-RepoPath 'NOTICE.md')
         Get-Content -Raw -LiteralPath (Resolve-RepoPath 'skills/role-prompt-authoring/README.md')
         $reviewDecision
@@ -301,6 +363,7 @@ if ($Mode -in @('Release', 'Published')) {
         '当前没有 `?LICENSE`?',
         '(?i)local draft',
         '(?i)no license has been selected',
+        '(?i)does not yet have a selected license',
         '(?i)public release is blocked'
     )
     if ($Mode -eq 'Published') {

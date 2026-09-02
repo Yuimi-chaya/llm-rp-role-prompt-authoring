@@ -1,5 +1,7 @@
 # Evaluation, Triage, And Iteration Protocol
 
+[简体中文](../zh-CN/evaluation-and-triage.md) | [English](evaluation-and-triage.md)
+
 Status: current shared protocol, 2026-09-02.
 
 Specification revision: `2026-09-02.4`.

@@ -1,5 +1,7 @@
 # Migration From Historical Authoring Skills
 
+[简体中文](../zh-CN/migration.md) | [English](migration.md)
+
 Status: current migration guide, 2026-09-02.
 
 Specification revision: `2026-09-02.4`.

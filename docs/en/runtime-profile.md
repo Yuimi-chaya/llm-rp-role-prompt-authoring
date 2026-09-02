@@ -1,5 +1,7 @@
 # Runtime Profile Contract
 
+[简体中文](../zh-CN/runtime-profile.md) | [English](runtime-profile.md)
+
 Status: current public contract, 2026-09-02.
 
 Specification revision: `2026-09-02.4`.

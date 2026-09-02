@@ -1,5 +1,7 @@
 # Architecture And Responsibility Boundaries
 
+[简体中文](../zh-CN/architecture.md) | [English](architecture.md)
+
 Status: current public architecture, 2026-09-02.
 
 Specification revision: `2026-09-02.4`.
@@ -38,11 +40,13 @@ The model layer determines the capability ceiling:
 - reasoning and ambiguity handling;
 - sampling variance.
 
-A Prompt can improve probability and reduce conflict. It cannot guarantee behavior the model is unable to understand or follow.
+A Prompt is used to influence behavior probabilities and remove authoring conflicts. It cannot guarantee behavior the model is unable to understand or follow.
+
+The model defines the available behavior distribution. The host owns the actual request parameters used to sample from it.
 
 ### Prompt Layer
 
-The Prompt layer owns:
+The Prompt layer encodes accepted character semantics and interaction guidance:
 
 - identity, Canon, personality causality, relationship, and expression;
 - attention and interpretation tendencies;
@@ -50,7 +54,7 @@ The Prompt layer owns:
 - minimum host semantics the target model must understand;
 - soft boundaries against common Prompt-side failure patterns.
 
-It does not own persistent truth, actual tool execution, or delivery state.
+It does not establish Canon truth by itself and does not own persistent truth, source authority, actual tool execution, or delivery state.
 
 ### Host Layer
 
@@ -65,6 +69,8 @@ The host layer owns:
 
 When the host does not provide a reliable fact or capability, the Prompt may preserve uncertainty but cannot manufacture the missing guarantee.
 
+The authoring workflow sits outside these three runtime layers. Its semantic sources, runtime profile, evidence, and build records are not additional runtime layers and are not injected beside the final role Prompt.
+
 ## Canonical Documents
 
 Each public document has one responsibility:
@@ -73,11 +79,11 @@ Each public document has one responsibility:
 | --- | --- | --- |
 | `README.md` | Product discovery, current entry, repository map, publication status | A second Skill specification |
 | `skills/role-prompt-authoring/*.md` | The executable authoring workflow | A host runtime manual |
-| `docs/architecture.md` | Responsibility boundaries and public information architecture | A full evaluation protocol |
-| `docs/output-contracts.md` | Artifact names, ownership, lifecycle, and injection rules | A role-writing tutorial |
-| `docs/runtime-profile.md` | Runtime fact schema and evidence requirements | Platform implementation code |
-| `docs/evaluation-and-triage.md` | Testing, attribution, iteration, and stopping rules | A benchmark leaderboard |
-| `docs/migration.md` | Mapping historical artifacts to the current workflow | A duplicate current Skill |
+| `docs/*/architecture.md` | Responsibility boundaries and public information architecture | A full evaluation protocol |
+| `docs/*/output-contracts.md` | Artifact names, ownership, lifecycle, and injection rules | A role-writing tutorial |
+| `docs/*/runtime-profile.md` | Runtime fact schema and evidence requirements | Platform implementation code |
+| `docs/*/evaluation-and-triage.md` | Testing, attribution, iteration, and stopping rules | A benchmark leaderboard |
+| `docs/*/migration.md` | Mapping historical artifacts to the current workflow | A duplicate current Skill |
 | `archive/` | Historical evidence and reproducibility | An active entry point |
 
 If two documents appear to own the same rule, move the detailed rule to the owner above and leave only a short pointer elsewhere.
