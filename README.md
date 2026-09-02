@@ -4,7 +4,7 @@
 
 [简体中文](README.md) | [English](README.en.md)
 
-> 当前状态：`2.0.0-draft.4`，规范修订 `2026-09-02.4`。这是尚未公开、尚未选择许可证的本地发布候选。
+> 当前状态：`2.0.0-draft.4`，规范修订 `2026-09-02.4`，`publication_status: release-ready`。本版本有意作为公开草案发布，不冒充稳定版 `2.0.0`。
 
 这是一个面向现实一对一私聊的角色 Prompt 作者侧方法。它从普通用户能够自然说出的角色需求出发，先建立可复用的角色语义，再在证据充分时结合目标模型与宿主条件，生成运行时唯一可注入的角色 Prompt。
 
@@ -20,6 +20,7 @@
 - 从早期方法迁移：[历史来源与方法迁移](docs/zh-CN/migration.md)
 - 中英文文档总索引：[docs/README.md](docs/README.md)
 - 来源、历史原件与实验原型（双语索引）：[archive/README.md](archive/README.md)
+- MIT 许可适用范围：[LICENSE-SCOPE.md](LICENSE-SCOPE.md)
 - 当前发布门禁（机器可读英文记录）：[PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md)
 
 ## 先分清三层
@@ -197,6 +198,8 @@ Prompt 可以用于影响行为概率与降低冲突，但不能凭空提供：
 ```text
 README.md                 中文主入口
 README.en.md              English entry
+LICENSE                   MIT License
+LICENSE-SCOPE.md          代码、文档、Prompt 与归档的许可边界
 NOTICE.md
 PUBLICATION-REVIEW.md
 skills/
@@ -216,9 +219,11 @@ scripts/validate-release.ps1
 
 ## 发布状态与许可证
 
-当前没有 `LICENSE`。在仓库所有者选择适用于代码、文档、Prompt 和归档材料的许可证，并完成 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) 中的第三方内容、隐私、归档和所有者确认前，本仓库只是本地发布候选。
+本仓库采用 [MIT License](LICENSE)。它覆盖本仓库所有者有权授权的代码、文档、Prompt、Skill、测试、译本与历史归档；外链内容、HDSI 等第三方材料、项目名称、商标、角色 IP、用户材料和未入库内容不因被提及而自动获得 MIT 授权。详细边界见 [LICENSE-SCOPE.md](LICENSE-SCOPE.md)。
 
-- `scripts/validate-release.ps1 -Mode Draft`：检查本地候选结构、链接、归档哈希、敏感信息和双语一致性；许可证未定时只警告。
+`2.0.0-draft.4` 是有意公开的研究草案，不是稳定版 `2.0.0`，也没有获得跨模型、跨平台效果证明。当前机器可读状态为 `release-ready`；实际公开后必须在 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) 记录发布日期并通过 `Published` 审计。
+
+- `scripts/validate-release.ps1 -Mode Draft`：检查结构、链接、归档哈希、敏感信息、许可文件、Git 白名单和双语一致性。
 - `scripts/validate-release.ps1 -Mode Release`：发布前门禁，要求状态为 `release-ready`、许可证与许可范围齐全、全部复核完成，同时保持 `published_at: null`。
 - `scripts/validate-release.ps1 -Mode Published`：真实发布后的审计，要求状态为 `published`、记录实际发布日期，并清除对外文档中的预发布措辞。
 

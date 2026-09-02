@@ -7,7 +7,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-$root = [System.IO.Path]::GetFullPath($RepositoryRoot)
+$root = [System.IO.Path]::GetFullPath($RepositoryRoot).TrimEnd(
+    [System.IO.Path]::DirectorySeparatorChar,
+    [System.IO.Path]::AltDirectorySeparatorChar
+)
+$rootPrefix = $root + [System.IO.Path]::DirectorySeparatorChar
 $failures = [System.Collections.Generic.List[string]]::new()
 $warnings = [System.Collections.Generic.List[string]]::new()
 
@@ -24,15 +28,24 @@ function Add-Warning {
 function Resolve-RepoPath {
     param([string]$RelativePath)
     $path = [System.IO.Path]::GetFullPath((Join-Path $root $RelativePath))
-    if (-not $path.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {
+    $isRoot = $path.Equals($root, [System.StringComparison]::OrdinalIgnoreCase)
+    $isChild = $path.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)
+    if (-not ($isRoot -or $isChild)) {
         throw "Path escapes repository root: $RelativePath"
     }
     return $path
 }
 
+function Get-RepoRelativePath {
+    param([string]$FullPath)
+    return [System.IO.Path]::GetRelativePath($root, $FullPath).Replace('\', '/')
+}
+
 $requiredFiles = @(
     'README.md',
     'README.en.md',
+    'LICENSE',
+    'LICENSE-SCOPE.md',
     'NOTICE.md',
     'PUBLICATION-REVIEW.md',
     'skills/README.md',
@@ -65,6 +78,44 @@ foreach ($relativePath in $requiredFiles) {
     if (-not (Test-Path -LiteralPath (Resolve-RepoPath $relativePath) -PathType Leaf)) {
         Add-Failure "Missing required file: $relativePath"
     }
+}
+
+$gitMetadataPath = Join-Path $root '.git'
+$trackedFiles = @()
+if (Test-Path -LiteralPath $gitMetadataPath) {
+    $trackedFiles = @(git -C $root ls-files)
+    if ($LASTEXITCODE -ne 0) {
+        Add-Failure 'Unable to read the Git tracked-file allowlist.'
+    }
+    else {
+        $allowedTrackedFiles = @('.gitignore') + $requiredFiles
+        foreach ($requiredTrackedFile in $allowedTrackedFiles) {
+            if ($trackedFiles -notcontains $requiredTrackedFile) {
+                Add-Failure "Required publication file is not Git-tracked: $requiredTrackedFile"
+            }
+        }
+        foreach ($trackedFile in $trackedFiles) {
+            if ($allowedTrackedFiles -notcontains $trackedFile) {
+                Add-Failure "Git-tracked file is outside the publication allowlist: $trackedFile"
+            }
+        }
+
+        if ($Mode -in @('Release', 'Published')) {
+            $gitStatus = @(git -C $root status --porcelain=v1 --untracked-files=all)
+            if ($LASTEXITCODE -ne 0) {
+                Add-Failure 'Unable to verify that the publication worktree is clean.'
+            }
+            elseif ($gitStatus.Count -gt 0) {
+                Add-Failure "$Mode validation requires a clean Git worktree and index. Commit or remove every staged, unstaged, and untracked change first."
+            }
+        }
+    }
+}
+elseif ($Mode -in @('Release', 'Published')) {
+    Add-Failure "$Mode validation requires a Git repository so the tracked-file allowlist can be checked."
+}
+else {
+    Add-Warning 'Git metadata is unavailable; the tracked-file allowlist was not checked.'
 }
 
 $skillFiles = @(
@@ -127,7 +178,6 @@ foreach ($entry in $archiveHashes.GetEnumerator()) {
     }
 }
 
-$textExtensions = @('.md', '.ps1', '.txt', '.json', '.yaml', '.yml')
 $forbiddenPatterns = [ordered]@{
     'credential-like OpenAI key' = 'sk-[A-Za-z0-9_-]{16,}'
     'OpenSSL salted ciphertext' = 'U2FsdGVkX1[A-Za-z0-9+/=]{20,}'
@@ -136,24 +186,49 @@ $forbiddenPatterns = [ordered]@{
     'private source directory name' = ('AstrBot' + '真实环境')
 }
 
-$files = Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object {
-    $_.FullName -notmatch '[\\/]\.git[\\/]' -and $textExtensions -contains $_.Extension
+$files = @()
+if ($trackedFiles.Count -gt 0) {
+    foreach ($trackedFile in $trackedFiles) {
+        $trackedPath = Resolve-RepoPath $trackedFile
+        if (Test-Path -LiteralPath $trackedPath -PathType Leaf) {
+            $files += Get-Item -LiteralPath $trackedPath
+        }
+    }
+}
+else {
+    $files = @(Get-ChildItem -LiteralPath $root -Recurse -File | Where-Object {
+        $_.FullName -notmatch '[\\/]\.git[\\/]'
+    })
 }
 
+$strictUtf8 = [System.Text.UTF8Encoding]::new($false, $true)
+
 foreach ($file in $files) {
+    $relativeFile = Get-RepoRelativePath $file.FullName
     if ($file.Length -gt 1MB) {
-        Add-Failure "File exceeds 1 MiB allowlist limit: $($file.FullName.Substring($root.Length + 1))"
+        Add-Failure "File exceeds 1 MiB allowlist limit: $relativeFile"
     }
 
     $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
     if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {
-        Add-Failure "UTF-8 BOM found: $($file.FullName.Substring($root.Length + 1))"
+        Add-Failure "UTF-8 BOM found: $relativeFile"
+    }
+    if ($bytes -contains 0) {
+        Add-Failure "NUL byte or binary content found in publication file: $relativeFile"
+        continue
     }
 
-    $content = [System.IO.File]::ReadAllText($file.FullName)
+    try {
+        $content = $strictUtf8.GetString($bytes)
+    }
+    catch {
+        Add-Failure "Publication file is not valid UTF-8: $relativeFile"
+        continue
+    }
+
     foreach ($pattern in $forbiddenPatterns.GetEnumerator()) {
         if ([regex]::IsMatch($content, $pattern.Value)) {
-            Add-Failure "$($pattern.Key) found in $($file.FullName.Substring($root.Length + 1))"
+            Add-Failure "$($pattern.Key) found in $relativeFile"
         }
     }
 }
@@ -172,11 +247,13 @@ foreach ($file in $markdownFiles) {
             continue
         }
         $resolved = [System.IO.Path]::GetFullPath((Join-Path $file.DirectoryName $pathPart))
-        if (-not $resolved.StartsWith($root, [System.StringComparison]::OrdinalIgnoreCase)) {
-            Add-Failure "Markdown link escapes repository: $($file.FullName.Substring($root.Length + 1)) -> $target"
+        $isRoot = $resolved.Equals($root, [System.StringComparison]::OrdinalIgnoreCase)
+        $isChild = $resolved.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)
+        if (-not ($isRoot -or $isChild)) {
+            Add-Failure "Markdown link escapes repository: $(Get-RepoRelativePath $file.FullName) -> $target"
         }
         elseif (-not (Test-Path -LiteralPath $resolved)) {
-            Add-Failure "Broken Markdown link: $($file.FullName.Substring($root.Length + 1)) -> $target"
+            Add-Failure "Broken Markdown link: $(Get-RepoRelativePath $file.FullName) -> $target"
         }
     }
 }
@@ -287,13 +364,26 @@ if ($Mode -in @('Release', 'Published')) {
     if (-not $licensePresent) {
         Add-Failure "$Mode mode requires LICENSE."
     }
+    else {
+        $licenseText = Get-Content -Raw -LiteralPath (Resolve-RepoPath 'LICENSE')
+        foreach ($phrase in @(
+            'MIT License',
+            'Copyright (c) 2026 Yuimi-chaya',
+            'Permission is hereby granted, free of charge',
+            'THE SOFTWARE IS PROVIDED "AS IS"'
+        )) {
+            if (-not $licenseText.Contains($phrase)) {
+                Add-Failure "LICENSE is missing required MIT text: $phrase"
+            }
+        }
+    }
     if (-not $licenseScopePresent) {
         Add-Failure "$Mode mode requires LICENSE-SCOPE.md covering documentation, Prompt files, scripts, and archive material."
     }
     else {
         $licenseScope = Get-Content -Raw -LiteralPath (Resolve-RepoPath 'LICENSE-SCOPE.md')
-        foreach ($term in @('code', 'documentation', 'prompt', 'archive')) {
-            if ($licenseScope -notmatch "(?i)\b$term\b") {
+        foreach ($term in @('code', 'documentation', 'Prompt', 'archive', 'translation', 'third-party', 'HDS Interlude', 'Yuimi-chaya')) {
+            if ($licenseScope -notmatch "(?i)$([regex]::Escape($term))") {
                 Add-Failure "LICENSE-SCOPE.md must explicitly address: $term"
             }
         }
@@ -307,12 +397,15 @@ if ($Mode -in @('Release', 'Published')) {
         $expectedStatus = if ($Mode -eq 'Release') { 'release-ready' } else { 'published' }
         $reviewFieldNames = @(
             'publication_status',
+            'repository_url',
+            'license',
             'reviewed_at',
             'published_at',
             'license_scope_reviewed',
             'third_party_reviewed',
             'privacy_reviewed',
             'archive_reviewed',
+            'history_reviewed',
             'owner_approval'
         )
         $reviewValues = @{}
@@ -329,6 +422,14 @@ if ($Mode -in @('Release', 'Published')) {
 
         if ($reviewValues.ContainsKey('publication_status') -and $reviewValues.publication_status -ne $expectedStatus) {
             Add-Failure "PUBLICATION-REVIEW.md publication_status must be $expectedStatus in $Mode mode."
+        }
+
+        if ($reviewValues.ContainsKey('repository_url') -and $reviewValues.repository_url -ne 'https://github.com/Yuimi-chaya/llm-rp-role-prompt-authoring') {
+            Add-Failure 'PUBLICATION-REVIEW.md repository_url does not match the approved GitHub repository.'
+        }
+
+        if ($reviewValues.ContainsKey('license') -and $reviewValues.license -ne 'MIT') {
+            Add-Failure 'PUBLICATION-REVIEW.md license must be MIT.'
         }
 
         if ($reviewValues.ContainsKey('reviewed_at')) {
@@ -363,10 +464,13 @@ if ($Mode -in @('Release', 'Published')) {
                 if (-not $validPublishedAt -or $publishedAt.Date -gt (Get-Date).Date) {
                     Add-Failure 'PUBLICATION-REVIEW.md published_at must be a valid, non-future YYYY-MM-DD date in Published mode.'
                 }
+                elseif ($validReviewedAt -and $publishedAt.Date -lt $reviewedAt.Date) {
+                    Add-Failure 'PUBLICATION-REVIEW.md published_at cannot be earlier than reviewed_at.'
+                }
             }
         }
 
-        foreach ($fieldName in @('license_scope_reviewed', 'third_party_reviewed', 'privacy_reviewed', 'archive_reviewed', 'owner_approval')) {
+        foreach ($fieldName in @('license_scope_reviewed', 'third_party_reviewed', 'privacy_reviewed', 'archive_reviewed', 'history_reviewed', 'owner_approval')) {
             if ($reviewValues.ContainsKey($fieldName) -and $reviewValues[$fieldName] -ne 'true') {
                 Add-Failure "PUBLICATION-REVIEW.md $fieldName must be true in $Mode mode."
             }
@@ -408,7 +512,12 @@ if ($Mode -in @('Release', 'Published')) {
             '(?i)local pre-release',
             '(?i)pre-publication notice',
             '(?i)not yet published',
-            '(?i)has not been published'
+            '(?i)has not been published',
+            'publication_status:\s*release-ready',
+            '发布就绪草案',
+            '(?i)release-ready draft',
+            '当前机器可读状态为 `release-ready`',
+            '(?i)current machine-readable state is `release-ready`'
         )
     }
     foreach ($pattern in $stalePatterns) {
@@ -426,7 +535,7 @@ else {
     }
 }
 
-Write-Host "Validated $($requiredFiles.Count) required paths and $($files.Count) text files."
+Write-Host "Validated $($requiredFiles.Count) required paths and $($files.Count) publication files."
 
 foreach ($warning in $warnings) {
     Write-Warning $warning

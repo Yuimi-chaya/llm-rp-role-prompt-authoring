@@ -15,6 +15,8 @@ Persona Definition v1 的中文正文可追溯到公开文章[《给 AstrBot 写
 
 历史 Skill Markdown 从研究源按字节冻结；各目录 README 只补充来源、发布元数据和当前状态，不属于历史原件正文。
 
+本目录中由仓库所有者授权的四份历史 Skill 正文及其元数据纳入根目录 MIT License；具体范围与第三方边界见 [`LICENSE-SCOPE.md`](../LICENSE-SCOPE.md)。
+
 ## English
 
 This directory preserves historical and experimental authoring files for reproducibility and migration.
@@ -29,3 +31,5 @@ Contents:
 The Chinese Persona Definition v1 body traces to the public article [《给 AstrBot 写人设提示词这件事,我踩过的一些坑》 (“Lessons From Writing Persona Prompts For AstrBot”)](https://github.com/Yuimi-chaya/Yuimi-chaya.github.io/blob/main/src/content/blog/astrbot-roleplay-persona-notes.md). Its directory README records the pinned source commit, body relationship, English translation status, and file hashes.
 
 Historical Skill Markdown files are byte-frozen from the research source. Archive README files add provenance, publication metadata, and current status; they are not part of the original artifact bodies.
+
+The four historical Skill bodies and their metadata authorized by the repository owner are covered by the root MIT License. See [`LICENSE-SCOPE.md`](../LICENSE-SCOPE.md) for the exact scope and third-party boundaries.

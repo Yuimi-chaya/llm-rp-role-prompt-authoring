@@ -24,6 +24,10 @@ Status: `historical`, `superseded-as-entry`, `archived-benchmark-artifact`.
 
 截至 2026-09-02，文章内嵌代码块中的中文 Skill 正文在解码 HTML 实体并统一换行与末尾空白后，与本目录中文文件正文一致。文章里的 Skill 元数据包装和 HTML 容器不属于独立归档文件。英文文件是本项目维护的配套译本，不声称该文件曾包含在公开文章中。
 
+### 许可
+
+仓库所有者 `Yuimi-chaya` 确认其拥有中文 Skill 正文并授权本归档以根目录 MIT License 发布；本项目维护的英文译本也纳入该许可。该授权只覆盖本仓库实际保存的两个文件，不覆盖外链博客仓库的完整文章或其他内容。详见 [`LICENSE-SCOPE.md`](../../LICENSE-SCOPE.md)。
+
 ### 文件
 
 | 文件 | 性质 | SHA-256 |
@@ -56,6 +60,10 @@ Current entry points:
 - Pinned source commit: `9ddf51215ec7bbcf86d3f43eaf682543a4ced6ce`
 
 As verified on 2026-09-02, the Chinese Skill body embedded in the article matches the Chinese archive body after HTML entity decoding and normalization of line endings and trailing whitespace. The article's Skill metadata wrapper and HTML container are not part of the standalone archive file. The English file is a project-maintained companion translation and is not claimed to be an English original from the article.
+
+### License
+
+Repository owner `Yuimi-chaya` confirms ownership of the Chinese Skill body and authorizes this archived copy under the root MIT License. The project-maintained English translation is covered as well. This grant applies only to the two files stored in this repository, not to the complete linked article or other content in the external blog repository. See [`LICENSE-SCOPE.md`](../../LICENSE-SCOPE.md).
 
 ### Files
 

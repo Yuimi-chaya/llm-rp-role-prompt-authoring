@@ -1,22 +1,20 @@
-# Pre-Publication Notice
-
-Status: local draft as of 2026-09-02.
+# Repository Notice
 
 ## License
 
-No license has been selected for this repository. A future public release must add an explicit license chosen by the repository owner. Until then, this tree is a local publication candidate rather than a completed open-source release.
+This repository is licensed under the [MIT License](LICENSE). [LICENSE-SCOPE.md](LICENSE-SCOPE.md) explains how that license applies to code, documentation, Prompt and Skill files, translations, tests, and archive material, and which third-party rights remain outside the grant.
 
-The machine-readable publication state is tracked in `PUBLICATION-REVIEW.md`.
+The machine-readable publication state and completed review evidence are tracked in [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md).
 
 ## Privacy And Publication Scope
 
-The initial public allowlist intentionally excludes real chat transcripts, screenshots, credentials, private runtime configuration, internal recovery notes, and real deployment iteration directories. Adding a case study or benchmark evidence package requires a separate review of authorization, personal data, necessity, and licensing.
+The public allowlist intentionally excludes real chat transcripts, screenshots, credentials, private runtime configuration, internal recovery notes, and real deployment iteration directories. The `private-chat` archive name describes an interaction setting and does not contain private conversations. Adding a case study or benchmark evidence package requires a separate review of authorization, personal data, necessity, and licensing.
 
 ## Third-Party Concepts And Materials
 
-The architecture was informed by research into host-authoritative roleplay systems, including HDSI. This repository does not copy HDSI source code, fixed prompts, JSON contracts, or implementation files. Research concepts are restated as general authorship boundaries for single-prompt private chat.
+The architecture was informed by research into host-authoritative roleplay systems, including [HDS Interlude (HDSI)](https://github.com/fy79/HDS). The reviewed HDSI `0.1.4` snapshot includes the GNU Affero General Public License version 3. This repository does not copy HDSI source code, fixed prompts, JSON contracts, or implementation files; its MIT License does not apply to external HDSI materials. General architectural concepts are restated here as original authorship boundaries for single-Prompt private chat.
 
-Character IP, model outputs, screenshots, and benchmark data may have rights or platform terms distinct from the repository's own documentation and scripts. They are not part of the initial public allowlist unless explicitly included and reviewed.
+AstrBot, OneBot, GitHub, HDSI, model, provider, and other project names or marks remain the property of their respective owners. Character IP, user material, model outputs, screenshots, linked content, and benchmark data may have rights or platform terms distinct from this repository. They are not included unless explicitly added, authorized, and reviewed.
 
 ## Claims
 

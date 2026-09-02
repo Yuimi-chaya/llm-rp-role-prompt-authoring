@@ -4,7 +4,7 @@
 
 [简体中文](README.md) | [English](README.en.md)
 
-> Current status: `2.0.0-draft.4`, specification revision `2026-09-02.4`. This is a local publication candidate that has not been published and does not yet have a selected license.
+> Current status: `2.0.0-draft.4`, specification revision `2026-09-02.4`, `publication_status: release-ready`. This version is intentionally being published as a draft and does not claim to be stable `2.0.0`.
 
 This repository defines an authoring method for realistic one-to-one direct-message role Prompts. It starts from a character request an ordinary user could naturally write, builds reusable character semantics, and, when the evidence threshold is met, compiles them for a specific model and host into the runtime's single injectable role Prompt.
 
@@ -20,6 +20,7 @@ The project does not promise to make arbitrary models human, and it does not try
 - Migration from earlier methods: [Historical Sources And Migration](docs/en/migration.md)
 - Bilingual documentation index: [docs/README.md](docs/README.md)
 - Provenance, historical artifacts, and prototypes: [archive/README.md](archive/README.md)
+- MIT license scope: [LICENSE-SCOPE.md](LICENSE-SCOPE.md)
 - Publication gates: [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md)
 
 ## Start With Three Layers
@@ -197,6 +198,8 @@ When the failure belongs to the model or host, stop lengthening the Prompt. Chan
 ```text
 README.md                 Chinese primary entry
 README.en.md              English entry
+LICENSE                   MIT License
+LICENSE-SCOPE.md          license boundaries for code, documentation, Prompts, and archives
 NOTICE.md
 PUBLICATION-REVIEW.md
 skills/
@@ -216,9 +219,11 @@ The initial publication allowlist excludes real deployment Prompts, private chat
 
 ## Publication And License
 
-There is currently no `LICENSE`. Until the repository owner selects a license covering code, documentation, Prompt files, and archive material and completes the third-party, privacy, archive, and owner reviews in [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md), this repository remains a local publication candidate.
+This repository uses the [MIT License](LICENSE). It covers code, documentation, Prompts, Skills, tests, translations, and historical archives that the repository owner is authorized to license. Linked content, third-party material such as HDSI, project names, marks, character IP, user material, and content not stored here do not become MIT-licensed merely because they are mentioned. See [LICENSE-SCOPE.md](LICENSE-SCOPE.md) for the exact boundaries.
 
-- `scripts/validate-release.ps1 -Mode Draft` checks structure, links, archive hashes, sensitive material, and bilingual consistency; an unresolved license produces warnings.
+`2.0.0-draft.4` is an intentionally public research draft, not stable `2.0.0`, and it has no demonstrated cross-model or cross-platform effect guarantee. The current machine-readable state is `release-ready`; after actual publication, [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) must record the publication date and pass the `Published` audit.
+
+- `scripts/validate-release.ps1 -Mode Draft` checks structure, links, archive hashes, sensitive material, license files, the Git allowlist, and bilingual consistency.
 - `scripts/validate-release.ps1 -Mode Release` is the pre-publication gate. It requires `release-ready`, complete license scope, completed reviews, and `published_at: null`.
 - `scripts/validate-release.ps1 -Mode Published` is the post-publication audit. It requires `published`, the actual publication date, and no remaining pre-publication wording.
 
