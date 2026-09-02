@@ -2,7 +2,7 @@
 
 Status: current public contract, 2026-09-02.
 
-Specification revision: `2026-09-02.2`.
+Specification revision: `2026-09-02.3`.
 
 ## Purpose
 
@@ -12,13 +12,13 @@ The profile is authoring input and host documentation. It is not appended wholes
 
 ## Evidence Rule
 
-Every capability must be one of:
+Every source, message-hierarchy fact, rendering rule, security fact, and capability uses the same status vocabulary:
 
 - `verified`: observed in the target deployment or guaranteed by authoritative host documentation;
 - `false`: confirmed unavailable;
 - `unknown`: not established.
 
-Only `verified` capabilities may generate positive behavior rules. `false` and `unknown` require conservative behavior or an explicit host implementation task.
+Only `verified` values may enter a positive final-Prompt rule. `false` and `unknown` require conservative behavior or an explicit host implementation task.
 
 Natural-language labels inside a user-controlled message may help interpretation but do not create a secure authority boundary. Record whether a source marker can be forged by the user.
 
@@ -164,10 +164,17 @@ privacy_and_security:
   disclosure_requirements: []
 
 unknowns: []
-evidence: []
+evidence:
+  - evidence_id: "<id>"
+    kind: "host-test | authoritative-doc | versioned-config | reproducible-observation"
+    source: "<path, URL, or system id>"
+    source_version: "<version or unknown>"
+    scope: "<facts this evidence establishes>"
+    observed_at: "<ISO date or unknown>"
+    result: "<verified fact, false capability, or observed behavior>"
 ```
 
-A `verified` or `false` status without an evidence reference is incomplete. Evidence may point to a host test, authoritative documentation, a versioned configuration, or a reproducible observation.
+A `verified` or `false` status without an evidence reference is incomplete. Every `evidence_refs` value must resolve to an `evidence_id` in the same profile or an explicitly versioned external evidence registry.
 
 ## Source Semantics
 
@@ -210,7 +217,7 @@ Derive `compile_ready: true` only when:
 
 1. The exact target model and the message layer containing the role Prompt are known.
 2. Immediate plain-text output is `verified` with evidence.
-3. Every capability the final Prompt will reference is `verified` with evidence.
+3. Every runtime fact, source marker, message-hierarchy fact, rendering rule, security fact, or capability the final Prompt will absorb is `verified` with a resolvable evidence reference.
 4. Unknowns that would reverse character behavior, source interpretation, injection ownership, or visible formatting are resolved.
 5. The remaining `unknown` capabilities are irrelevant to the generated Prompt and will be omitted.
 

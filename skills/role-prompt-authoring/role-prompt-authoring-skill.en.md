@@ -1,8 +1,8 @@
 # Direct-Message Role Prompt Authoring Skill
 
-Version: `2.0.0-draft.2`
+Version: `2.0.0-draft.3`
 
-Specification revision: `2026-09-02.2`
+Specification revision: `2026-09-02.3`
 
 ## Purpose And Position
 
@@ -31,7 +31,7 @@ A role rule cannot create observations, facts, or actions that the host does not
 2. A target deployment contains one role Prompt, not `old role card + private-chat patch + platform notes`.
 3. Rewrite from semantic sources. Do not inject authoring analysis, asset names, evaluation standards, or research terminology into the target model.
 4. Role definition, runtime facts, and failure evidence each have one owner. Modify the source asset that owns a diagnosed problem.
-5. Return only one main artifact by default. “One main artifact” does not permit losing authoring-side semantic sources; every Prompt build must retain a non-injectable `BUILD_RECORD`, and a persistent workspace must preserve the referenced `ROLE_SPEC`.
+5. Return only one main artifact by default. “One main artifact” does not permit losing authoring-side semantic sources; every Prompt build must retain a non-injectable `BUILD_RECORD` and preserve its referenced versioned `ROLE_SPEC`.
 6. Preserve accepted character design. Do not change meaning without support from Canon, runtime conditions, or failure evidence.
 7. Optimize for relative improvement under the same model and host, not absolute performance across models and platforms.
 
@@ -46,6 +46,7 @@ Choose the internal mode from the user's starting point:
 | Create a Prompt for a known model and platform | `define -> compile` | `FINAL_ROLE_PROMPT` |
 | Existing role card has trusted character semantics and only needs adaptation | Parse and freeze character semantics, then `compile` | `FINAL_ROLE_PROMPT` |
 | Existing card has confused Canon, personality, or relationship logic | `audit -> define`, then compile if needed | One repair artifact appropriate to the request |
+| Existing card has no failure sample and the user only asks for review or optimization | `audit` static path | `TRIAGE_RESULT` with `evidence_basis: static`; revise only when explicitly requested and static evidence is sufficient |
 | Real chat feels unnatural or becomes OOC, and the user only wants diagnosis | `audit` | `TRIAGE_RESULT` |
 | Real chat feels unnatural and the user explicitly asks for a fix | `audit ->` owning mode; rebuild only when evidence is sufficient and Prompt-owned | A new `PORTABLE_ROLE_PROMPT`, `FINAL_ROLE_PROMPT`, or `ROLE_SPEC`; otherwise `TRIAGE_RESULT` |
 | The request is only about platform, tools, injection, scheduling, or delivery | Route to the host layer | Do not generate a role Prompt |
@@ -91,10 +92,10 @@ Maintain these concepts internally. Do not expose all of them unless the user as
 - `FINAL_ROLE_PROMPT`: the runtime-bound build artifact and the only role Prompt for the target deployment.
 - `TRIAGE_RESULT`: responsible layer, evidence strength, primary hypothesis, and next action.
 - `EVALUATION_PLAN`: a non-injectable test or regression plan produced by the `audit` planning path.
-- `BUILD_RECORD`: the minimum non-injectable record required for every Prompt build, including at least `role_spec_version`, `prompt_version`, `runtime_profile_id`, `preservation_map_version`, build mode, and validation status.
+- `BUILD_RECORD`: the minimum non-injectable record required for every Prompt build, including build and parent IDs, `role_spec_ref`, role and Prompt hashes, versions, runtime profile, preservation map, triggering triage, changed source, primary hypothesis, and validation status.
 - `NON_INJECTABLE_MANIFEST`: version, assumptions, changes, and capability gaps, provided only when explicitly requested.
 
-Both `PORTABLE_ROLE_PROMPT` and `FINAL_ROLE_PROMPT` are build artifacts, not the sole semantic source for later revisions. Return to `ROLE_SPEC`, `RUNTIME_PROFILE`, or real evidence and rebuild. Persist `ROLE_SPEC` and `BUILD_RECORD` when the authoring environment can store files or state. If it cannot, provide the minimum `BUILD_RECORD` as a separate non-injectable attachment.
+Both `PORTABLE_ROLE_PROMPT` and `FINAL_ROLE_PROMPT` are build artifacts, not the sole semantic source for later revisions. Return to `ROLE_SPEC`, `RUNTIME_PROFILE`, or real evidence and rebuild. Persist `ROLE_SPEC` and `BUILD_RECORD` when the authoring environment can store files or state. If it cannot, provide a `ROLE_SPEC` snapshot and the minimum `BUILD_RECORD` as separate non-injectable attachments.
 
 ## Shared Principles
 
@@ -194,7 +195,7 @@ Do not turn `false`, `unknown`, or omitted capabilities into positive promises. 
 
 The list above is an internal checklist, not a user questionnaire. Ask only when one unknown changes the artifact type, responsibility owner, or visible format. Keep other items `unknown` and omit the related capability.
 
-The runtime is `compile_ready` only when the exact target model and role-Prompt message layer are known, plain-text output is verified, every capability referenced by the final Prompt is `verified`, and unknowns that would reverse character behavior, source interpretation, or visible format are resolved. Unrelated capabilities may remain `unknown` and omitted.
+The runtime is `compile_ready` only when the exact target model and role-Prompt message layer are known, plain-text output is verified, every runtime fact, source marker, message-hierarchy fact, rendering rule, and capability absorbed by the final Prompt is `verified` with a resolvable evidence reference, and unknowns that would reverse character behavior, source interpretation, or visible format are resolved. Unrelated items may remain `unknown` and omitted.
 
 When the runtime is not `compile_ready`, either ask one highest-impact question or create a clearly unconditioned `PORTABLE_ROLE_PROMPT`. Do not label the result `FINAL_ROLE_PROMPT`.
 
@@ -300,7 +301,7 @@ Use:
 - `compilation_fault`: the definition is trusted, but ordering, explicitness, compression, source semantics, or private-chat behavior was compiled poorly;
 - `host_contract_fault`: source, state, time, tools, media, rendering, scheduling, or delivery lacks a host guarantee;
 - `model_limit`: the model still cannot understand or follow clear rules under the same conditions;
-- `sampling_variance`: a one-off route or sampling difference lacks enough evidence for attribution;
+- `sampling_variance`: repeated independent initializations under the same conditions show a reproducible routing or distribution shift; one anomaly may only list variance as a hypothesis to test;
 - `preference_mismatch`: user preference conflicts with the accepted character logic;
 - `insufficient_evidence`: the above cannot yet be distinguished.
 
@@ -332,7 +333,7 @@ Do not output internal analysis, intermediate representations, change logs, test
 
 When requested, provide a separate `NON_INJECTABLE_MANIFEST` clearly marked “do not inject into the target model.” Keep it separate from any injectable Prompt.
 
-Every `PORTABLE_ROLE_PROMPT` or `FINAL_ROLE_PROMPT` build must retain `BUILD_RECORD`. It is not a second Prompt. Save it silently in a persistent workspace, or provide it as a separate minimal non-injectable attachment in a chat-only environment.
+Every `PORTABLE_ROLE_PROMPT` or `FINAL_ROLE_PROMPT` build must retain `BUILD_RECORD`. It is not a second Prompt. Save it with the versioned `ROLE_SPEC` in a persistent workspace, or provide a `ROLE_SPEC` snapshot and minimal `BUILD_RECORD` as separate non-injectable authoring attachments in a chat-only environment.
 
 The final Prompt body must not contain:
 
@@ -348,7 +349,7 @@ Before delivery, confirm:
 
 - routing matches what the user actually wants to receive;
 - the target deployment has one injected Prompt and portable/final versions are not combined;
-- `ROLE_SPEC` is versioned and the Prompt build has a recoverable `BUILD_RECORD`;
+- `ROLE_SPEC` is versioned and recoverable, and `BUILD_RECORD` links character semantics, Prompt, runtime profile, and triggering triage through references and hashes;
 - role definition, runtime facts, and failure evidence are not mixed into one source;
 - `must_preserve` was not changed without evidence and `must_not_add` was not violated;
 - what the character notices, answers, skips, or closes follows from personality and relationship;

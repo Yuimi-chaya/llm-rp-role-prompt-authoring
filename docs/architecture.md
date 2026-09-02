@@ -2,7 +2,7 @@
 
 Status: current public architecture, 2026-09-02.
 
-Specification revision: `2026-09-02.2`.
+Specification revision: `2026-09-02.3`.
 
 ## Scope
 
@@ -107,7 +107,7 @@ every prompt build
 
 The final Prompt is a build artifact. Future iterations should return to the accepted semantic and runtime sources instead of endlessly patching the last generated text.
 
-“One main artifact” means one user-facing result and one injected role Prompt, not one total authoring file. A production workflow must persist the versioned `ROLE_SPEC` and a minimal `BUILD_RECORD`. In a chat-only environment without persistence, the build record is returned as a clearly separated non-injectable sidecar.
+“One main artifact” means one user-facing result and one injected role Prompt, not one total authoring file. A production workflow must persist the versioned `ROLE_SPEC` and a minimal `BUILD_RECORD`. In a chat-only environment without persistence, a `ROLE_SPEC` snapshot and the build record are returned as clearly separated non-injectable authoring sidecars.
 
 ## Private-Chat Execution Principles
 

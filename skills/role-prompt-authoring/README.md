@@ -1,6 +1,6 @@
 # Role Prompt Authoring Skill
 
-Status: `2.0.0-draft.2`, specification revision `2026-09-02.2`, local pre-release.
+Status: `2.0.0-draft.3`, specification revision `2026-09-02.3`, local pre-release.
 
 ## Choose One File
 

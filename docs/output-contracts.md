@@ -2,7 +2,7 @@
 
 Status: current public contract, 2026-09-02.
 
-Specification revision: `2026-09-02.2`.
+Specification revision: `2026-09-02.3`.
 
 ## Purpose
 
@@ -151,7 +151,7 @@ Use only when a `compile_ready` `RUNTIME_PROFILE` exists.
 
 - the exact target model and role-Prompt message layer are known;
 - immediate plain-text output is verified;
-- every capability referenced by the final Prompt is `verified` with evidence;
+- every runtime fact, source marker, message-hierarchy fact, rendering rule, security fact, or capability absorbed by the final Prompt is `verified` with a resolvable evidence reference;
 - unknowns that would reverse character behavior, source interpretation, or visible formatting are resolved;
 - unrelated capabilities may remain `unknown` and must be omitted.
 
@@ -169,6 +169,12 @@ Requirements:
 Recommended fields:
 
 ```yaml
+triage_id: "<id>"
+evidence_record_id: "<id>"
+affected_versions:
+  role_spec_version: "<version>"
+  prompt_version: "<version>"
+  runtime_profile_id: "<id or unknown>"
 responsible_layer: "definition_fault | compilation_fault | host_contract_fault | model_limit | sampling_variance | preference_mismatch | insufficient_evidence"
 evidence_basis: "static | single-sample | repeated-runtime | human-validated"
 evidence_strength: "<level>"
@@ -209,19 +215,27 @@ privacy_constraints: []
 Every portable or final Prompt build must retain:
 
 ```yaml
+build_id: "<id>"
+parent_build_id: "<id or none>"
 build_record_version: "<version>"
 role_spec_version: "<version>"
+role_spec_ref: "<path, resource id, or attached snapshot id>"
+role_spec_hash: "<hash>"
 prompt_version: "<version>"
+prompt_hash: "<hash>"
 build_mode: "portable | final"
 runtime_profile_id: "<id or none>"
 preservation_map_version: "<version or none>"
+trigger_triage_id: "<id or none>"
+changed_source: "role_spec | compiler | runtime_profile | none"
+primary_hypothesis: "<hypothesis or none>"
 skill_version: "<version>"
 spec_revision: "<revision>"
 validation_status: "author-reviewed | model-tested | human-validated"
 created_at: "<ISO date>"
 ```
 
-The build record is not a second role Prompt. Persist it in the authoring workspace. If the environment cannot retain files or hidden state, provide it as a separate minimal non-injectable sidecar.
+The build record is not a second role Prompt. Persist it in the authoring workspace. If the environment cannot retain files or hidden state, provide it together with a separate non-injectable `ROLE_SPEC` snapshot.
 
 The referenced `ROLE_SPEC` must also be recoverable. A build record containing only a version number is insufficient when no corresponding semantic source exists.
 

@@ -48,6 +48,7 @@ Skill 内部有三个模式，但用户不需要手工选择或连续调用三�
 ```text
 README.md
 NOTICE.md
+PUBLICATION-REVIEW.md
 skills/
   README.md
   role-prompt-authoring/
@@ -96,7 +97,7 @@ Prompt 可以改变行为概率和减少冲突，但不能凭空提供：
 
 ## 发布状态与许可证
 
-当前没有 `LICENSE`。在仓库所有者选择适用于代码、文档、Prompt 和归档材料的许可证，并完成第三方内容与隐私复核前，本仓库只是本地发布候选，不能宣称已经完成开源发布。可运行 `scripts/validate-release.ps1 -Mode Draft` 检查本地候选；`-Mode Release` 会在许可证或许可范围文件缺失时失败。
+当前没有 `LICENSE`。在仓库所有者选择适用于代码、文档、Prompt 和归档材料的许可证，并完成 [PUBLICATION-REVIEW.md](PUBLICATION-REVIEW.md) 中的第三方内容、隐私、归档和所有者确认前，本仓库只是本地发布候选，不能宣称已经完成开源发布。可运行 `scripts/validate-release.ps1 -Mode Draft` 检查本地候选；`-Mode Release` 会在许可证、许可范围或发布复核未完成时失败。
 
 ## English Summary
 

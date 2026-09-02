@@ -2,7 +2,7 @@
 
 Status: current shared protocol, 2026-09-02.
 
-Specification revision: `2026-09-02.2`.
+Specification revision: `2026-09-02.3`.
 
 ## Purpose
 
@@ -25,6 +25,8 @@ Review `ROLE_SPEC` without requiring a target platform:
 - platform tools, regexes, dynamic state, and model patches have not entered the semantic source.
 
 Failure returns to `define`.
+
+When a user supplies an existing card without a runtime failure and asks only for review or optimization, use the `audit` static path and return `TRIAGE_RESULT` with `evidence_basis: static`. Revise only when the user asks for a fix and the static evidence identifies a Prompt-owned defect.
 
 ### 2. Portable Build Review
 
@@ -52,7 +54,7 @@ Review `FINAL_ROLE_PROMPT` against `ROLE_SPEC`, `PRESERVATION_MAP`, and `RUNTIME
 - authoring assets, research terms, scoring, and per-turn algorithms are absent;
 - private-chat behavior is character-specific rather than a universal short-reply template;
 - Prompt length reflects necessary decisions rather than accumulated repairs.
-- the `RUNTIME_PROFILE` satisfies `compile_ready` for every capability the Prompt references;
+- the `RUNTIME_PROFILE` satisfies `compile_ready` for every runtime fact, source marker, hierarchy fact, rendering rule, security fact, or capability the Prompt absorbs;
 - a recoverable `BUILD_RECORD` exists.
 
 Failure returns to `compile` or the runtime profile owner.

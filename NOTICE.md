@@ -6,6 +6,8 @@ Status: local draft as of 2026-09-02.
 
 No license has been selected for this repository. A future public release must add an explicit license chosen by the repository owner. Until then, this tree is a local publication candidate rather than a completed open-source release.
 
+The machine-readable publication state is tracked in `PUBLICATION-REVIEW.md`.
+
 ## Privacy And Publication Scope
 
 The initial public allowlist intentionally excludes real chat transcripts, screenshots, credentials, private runtime configuration, internal recovery notes, and real deployment iteration directories. Adding a case study or benchmark evidence package requires a separate review of authorization, personal data, necessity, and licensing.

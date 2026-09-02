@@ -33,6 +33,7 @@ function Resolve-RepoPath {
 $requiredFiles = @(
     'README.md',
     'NOTICE.md',
+    'PUBLICATION-REVIEW.md',
     'skills/README.md',
     'skills/role-prompt-authoring/README.md',
     'skills/role-prompt-authoring/role-prompt-authoring-skill.zh-CN.md',
@@ -65,8 +66,8 @@ $skillFiles = @(
 )
 
 $requiredSkillTokens = @(
-    '2.0.0-draft.2',
-    '2026-09-02.2',
+    '2.0.0-draft.3',
+    '2026-09-02.3',
     'define',
     'compile',
     'audit',
@@ -183,6 +184,8 @@ if ($zhHeadings.Count -ne $enHeadings.Count) {
 
 $licensePresent = Test-Path -LiteralPath (Resolve-RepoPath 'LICENSE')
 $licenseScopePresent = Test-Path -LiteralPath (Resolve-RepoPath 'LICENSE-SCOPE.md')
+$publicationReviewPath = Resolve-RepoPath 'PUBLICATION-REVIEW.md'
+$publicationReviewPresent = Test-Path -LiteralPath $publicationReviewPath
 
 if ($Mode -eq 'Release') {
     if (-not $licensePresent) {
@@ -190,6 +193,42 @@ if ($Mode -eq 'Release') {
     }
     if (-not $licenseScopePresent) {
         Add-Failure 'Release mode requires LICENSE-SCOPE.md covering documentation, Prompt files, scripts, and archive material.'
+    }
+    else {
+        $licenseScope = Get-Content -Raw -LiteralPath (Resolve-RepoPath 'LICENSE-SCOPE.md')
+        foreach ($term in @('code', 'documentation', 'prompt', 'archive')) {
+            if ($licenseScope -notmatch "(?i)\b$term\b") {
+                Add-Failure "LICENSE-SCOPE.md must explicitly address: $term"
+            }
+        }
+    }
+
+    if (-not $publicationReviewPresent) {
+        Add-Failure 'Release mode requires PUBLICATION-REVIEW.md.'
+    }
+    else {
+        $review = Get-Content -Raw -LiteralPath $publicationReviewPath
+        $requiredReviewFields = [ordered]@{
+            publication_status = '(?m)^publication_status:\s*published\s*$'
+            published_at = '(?m)^published_at:\s*\d{4}-\d{2}-\d{2}\s*$'
+            license_scope_reviewed = '(?m)^license_scope_reviewed:\s*true\s*$'
+            third_party_reviewed = '(?m)^third_party_reviewed:\s*true\s*$'
+            privacy_reviewed = '(?m)^privacy_reviewed:\s*true\s*$'
+            archive_reviewed = '(?m)^archive_reviewed:\s*true\s*$'
+            owner_approval = '(?m)^owner_approval:\s*true\s*$'
+        }
+        foreach ($field in $requiredReviewFields.GetEnumerator()) {
+            if ($review -notmatch $field.Value) {
+                Add-Failure "PUBLICATION-REVIEW.md is not release-ready: $($field.Key)"
+            }
+        }
+    }
+
+    $releaseStatusText = (Get-Content -Raw -LiteralPath (Resolve-RepoPath 'README.md')) + "`n" + (Get-Content -Raw -LiteralPath (Resolve-RepoPath 'NOTICE.md'))
+    foreach ($pattern in @('本地预发布', '尚未公开', '(?i)local pre-release', '(?i)local draft', '(?i)no license has been selected')) {
+        if ($releaseStatusText -match $pattern) {
+            Add-Failure "Release-facing README/NOTICE still contains draft-state text matching: $pattern"
+        }
     }
 }
 else {

@@ -1,8 +1,8 @@
 # 现实私聊角色 Prompt 作者 Skill
 
-版本：`2.0.0-draft.2`
+版本：`2.0.0-draft.3`
 
-规范修订：`2026-09-02.2`
+规范修订：`2026-09-02.3`
 
 ## 用途与位置
 
@@ -31,7 +31,7 @@
 2. 最终部署只有一份角色 Prompt，不拼接“旧角色卡 + 私聊补丁 + 平台说明”。
 3. 从语义源统一重写，不把作者侧分析、资产名、测试标准或研究术语注入目标模型。
 4. 角色定义、运行事实和失败证据各有唯一来源；发现问题时修改拥有该问题的源资产。
-5. 默认只返回当前任务的一个主要产物。“一个主要产物”不等于丢弃作者侧语义源；每次 Prompt 构建都必须保留非注入的 `BUILD_RECORD`，并在可持久工作区保存其引用的 `ROLE_SPEC`。
+5. 默认只返回当前任务的一个主要产物。“一个主要产物”不等于丢弃作者侧语义源；每次 Prompt 构建都必须保留非注入的 `BUILD_RECORD`，并保存其引用的版本化 `ROLE_SPEC`。
 6. 保留用户已经确认的角色设计。没有 Canon、运行条件或失败证据支持时，不擅自改义。
 7. 目标是同模型、同宿主条件下的相对改善，不承诺跨模型、跨平台的绝对效果。
 
@@ -46,6 +46,7 @@
 | 从零生成用于确定模型与平台的 Prompt | `define -> compile` | `FINAL_ROLE_PROMPT` |
 | 已有角色卡，人物语义可信，只需模型或平台适配 | 解析并冻结角色语义后 `compile` | `FINAL_ROLE_PROMPT` |
 | 已有角色卡，但 Canon、人格或关系本身混乱 | `audit -> define`，按需再编译 | 当前请求对应的一份修复产物 |
+| 已有角色卡，无失败样本，只要求审查或优化 | `audit` 的 static 子路径 | `TRIAGE_RESULT`，`evidence_basis: static`；明确要求且静态证据充分时再修复 |
 | 真实聊天表现不自然或发生 OOC，只要求诊断 | `audit` | `TRIAGE_RESULT` |
 | 真实聊天表现不自然，并明确要求修复 | `audit ->` 问题所属模式；仅在证据充分且属于 Prompt 时重建 | 新的 `PORTABLE_ROLE_PROMPT`、`FINAL_ROLE_PROMPT` 或 `ROLE_SPEC`；否则 `TRIAGE_RESULT` |
 | 只问平台、工具、注入、调度或投递实现 | 移交宿主层 | 不生成角色 Prompt |
@@ -91,10 +92,10 @@
 - `FINAL_ROLE_PROMPT`：绑定确定运行条件的最终构建产物，是目标部署唯一角色 Prompt。
 - `TRIAGE_RESULT`：失败责任层、证据充分度、主要假设和下一步。
 - `EVALUATION_PLAN`：`audit` planning 子路径生成的非注入测试或回归计划。
-- `BUILD_RECORD`：每次 Prompt 构建必须保留的最小非注入记录，至少包含 `role_spec_version`、`prompt_version`、`runtime_profile_id`、`preservation_map_version`、构建模式和验证状态。
+- `BUILD_RECORD`：每次 Prompt 构建必须保留的最小非注入记录，至少包含构建 ID、父构建、`role_spec_ref`、角色与 Prompt 哈希、版本、运行档案、保全映射、触发归因、修改源、主要假设和验证状态。
 - `NON_INJECTABLE_MANIFEST`：用户明确要求时才提供的版本、假设、删改和能力缺口说明。
 
-`PORTABLE_ROLE_PROMPT` 和 `FINAL_ROLE_PROMPT` 都是构建产物，不是下一轮唯一语义源。后续迭代优先回到 `ROLE_SPEC`、`RUNTIME_PROFILE` 或真实证据，再重新生成。若作者环境能写文件或保存状态，内部持久化 `ROLE_SPEC` 与 `BUILD_RECORD`；若不能持久化，必须把最小 `BUILD_RECORD` 作为与 Prompt 分离的非注入附件交付。
+`PORTABLE_ROLE_PROMPT` 和 `FINAL_ROLE_PROMPT` 都是构建产物，不是下一轮唯一语义源。后续迭代优先回到 `ROLE_SPEC`、`RUNTIME_PROFILE` 或真实证据，再重新生成。若作者环境能写文件或保存状态，内部持久化 `ROLE_SPEC` 与 `BUILD_RECORD`；若不能持久化，必须把 `ROLE_SPEC` 快照和最小 `BUILD_RECORD` 作为与 Prompt 分离的非注入附件交付。
 
 ## 共同原则
 
@@ -194,7 +195,7 @@ unresolved      会反转人物表现、需要追问或保持不确定性的内�
 
 上面的列表是内部核对项，不是用户问卷。只有一个未知项会改变注入物类型、责任归属或可见格式时才追问；其余保持 `unknown` 并省略相关能力。
 
-只有同时满足以下条件才算 `compile_ready`：目标模型与角色 Prompt 所在消息层级已知；普通文本输出已验证；最终 Prompt 实际引用的每项能力均为 `verified`；会反转角色行为、来源解释或可见格式的未知项已经解决。无关能力可以继续保持 `unknown` 并不写入 Prompt。
+只有同时满足以下条件才算 `compile_ready`：目标模型与角色 Prompt 所在消息层级已知；普通文本输出已验证；最终 Prompt 吸收的每项运行事实、来源标记、消息层级、渲染规则和能力都为 `verified` 且有可解析证据；会反转角色行为、来源解释或可见格式的未知项已经解决。无关项目可以继续保持 `unknown` 并不写入 Prompt。
 
 未达到 `compile_ready` 时，要么问一个最高影响问题，要么生成明确标注未条件优化的 `PORTABLE_ROLE_PROMPT`；不得把结果命名为 `FINAL_ROLE_PROMPT`。
 
@@ -300,7 +301,7 @@ unresolved      会反转人物表现、需要追问或保持不确定性的内�
 - `compilation_fault`：角色定义可信，但目标 Prompt 的顺序、显式程度、压缩、来源语义或私聊行为编译不当；
 - `host_contract_fault`：来源、状态、时间、工具、媒体、渲染、调度或投递缺少宿主保证；
 - `model_limit`：在清楚规则和相同条件下仍无法稳定理解或遵循；
-- `sampling_variance`：单次路由或随机采样差异，证据不足以归因；
+- `sampling_variance`：相同条件下多次独立初始化显示出可重复的路由或分布波动；单次异常只能把它列为待验证假设；
 - `preference_mismatch`：用户偏好与已写角色逻辑并不一致；
 - `insufficient_evidence`：无法区分以上来源。
 
@@ -332,7 +333,7 @@ unresolved      会反转人物表现、需要追问或保持不确定性的内�
 
 用户明确要求说明时，可以另行提供 `NON_INJECTABLE_MANIFEST`，但必须与可注入 Prompt 分开，并清楚标记“不得注入目标模型”。
 
-每次生成 `PORTABLE_ROLE_PROMPT` 或 `FINAL_ROLE_PROMPT` 都必须保留 `BUILD_RECORD`。它不是第二张 Prompt；在有持久工作区时可静默保存，在纯聊天环境中必须作为分离、极简、不可注入的附件提供。
+每次生成 `PORTABLE_ROLE_PROMPT` 或 `FINAL_ROLE_PROMPT` 都必须保留 `BUILD_RECORD`。它不是第二张 Prompt；在有持久工作区时，与版本化 `ROLE_SPEC` 一起静默保存；在纯聊天环境中，必须把 `ROLE_SPEC` 快照和极简 `BUILD_RECORD` 作为分离、不可注入的作者侧附件提供。
 
 最终 Prompt 正文中不得出现：
 
@@ -348,7 +349,7 @@ unresolved      会反转人物表现、需要追问或保持不确定性的内�
 
 - 路由与用户真正想得到的产物一致；
 - 当前部署只有一个注入物，通用版与最终版没有并列；
-- `ROLE_SPEC` 有版本，Prompt 构建已有可恢复的 `BUILD_RECORD`；
+- `ROLE_SPEC` 有版本且可恢复，`BUILD_RECORD` 能通过引用与哈希关联角色语义、Prompt、运行档案和触发归因；
 - 角色定义、运行事实和失败证据没有混成同一来源；
 - `must_preserve` 未被无依据改写，`must_not_add` 未被违反；
 - 角色为何注意、回应、略过或收束能由人格与关系解释；

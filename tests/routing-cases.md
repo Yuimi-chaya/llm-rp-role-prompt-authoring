@@ -25,6 +25,7 @@ For each case, use one language version of the current Skill in a fresh prompt-w
 | R11 | User says only “优化一下，更像真人” and gives no card, sample, or target condition | minimum clarification | One highest-value question | Invent a review conclusion or treat taste as proven failure |
 | R12 | User provides one odd sample from a high-variance model | `audit` | `TRIAGE_RESULT` with `insufficient_evidence`; sampling variance may be the hypothesis | Add a universal rule or assert variance as fact |
 | R13 | User provides repeated evidence of a Prompt-owned failure and explicitly asks for a fix | `audit -> owning mode -> rebuild` | One revised Prompt artifact plus non-injectable `BUILD_RECORD` | Return only diagnosis or change unrelated character semantics |
+| R14 | User provides an existing card, no runtime failure, and asks only for review | `audit` static path | `TRIAGE_RESULT` with `evidence_basis: static` | Invent runtime evidence or produce an unrequested rewrite |
 
 ## Artifact Checks
 
@@ -63,7 +64,8 @@ For each case, use one language version of the current Skill in a fresh prompt-w
 ### `BUILD_RECORD`
 
 - Is retained for every portable or final build.
-- References a recoverable `ROLE_SPEC` version and the relevant runtime profile.
+- References a recoverable `ROLE_SPEC` snapshot or location, with role and Prompt hashes and the relevant runtime profile.
+- Links a repair build to its parent build, triggering triage, changed source, and primary hypothesis.
 - Is clearly non-injectable and never presented as a second role Prompt.
 
 ## Negative Selection Checks
@@ -79,4 +81,4 @@ The current Skill must not activate as the main solution for:
 
 ## Bilingual Parity Review
 
-Run at least R02, R03, R06, R07, R10, R12, and R13 against both language files. Equivalent requests must select the same route and artifact category. Exact wording may differ; ownership, boundaries, and output count must not.
+Run at least R02, R03, R06, R07, R10, R12, R13, and R14 against both language files. Equivalent requests must select the same route and artifact category. Exact wording may differ; ownership, boundaries, and output count must not.
