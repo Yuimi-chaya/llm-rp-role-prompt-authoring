@@ -84,7 +84,7 @@ A character may still talk at length, comfort seriously, ask questions, or expla
 
 ## HDSI as a Framework Reference
 
-[HDS Interlude (HDSI)](https://github.com/fy79/HDS) provides a useful public reference: naturalness may depend not only on persona content, but also on **how the whole system shares the work of a conversation**.
+[HDS Interlude (HDSI)](https://gitee.com/MomoiCore/hds-interlude) provides a useful public reference: naturalness may depend not only on persona content, but also on **how the whole system shares the work of a conversation**.
 
 HDSI is not the traditional setup where one role prompt goes directly to one model for an immediate reply. Its public design describes several possible layers behind one visible interaction:
 

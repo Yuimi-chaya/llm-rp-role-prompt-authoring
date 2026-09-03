@@ -12,7 +12,7 @@ The public allowlist intentionally excludes real chat transcripts, screenshots, 
 
 ## Third-Party Concepts And Materials
 
-The architecture was informed by research into host-authoritative roleplay systems, including [HDS Interlude (HDSI)](https://github.com/fy79/HDS). The reviewed HDSI `0.1.4` snapshot includes the GNU Affero General Public License version 3. This repository does not copy HDSI source code, fixed prompts, JSON contracts, or implementation files; its MIT License does not apply to external HDSI materials. General architectural concepts are restated here as original authorship boundaries for single-Prompt private chat.
+The architecture was informed by research into host-authoritative roleplay systems, including [HDS Interlude (HDSI)](https://gitee.com/MomoiCore/hds-interlude). The reviewed HDSI `0.1.4` snapshot includes the GNU Affero General Public License version 3. This repository does not copy HDSI source code, fixed prompts, JSON contracts, or implementation files; its MIT License does not apply to external HDSI materials. General architectural concepts are restated here as original authorship boundaries for single-Prompt private chat.
 
 AstrBot, OneBot, GitHub, HDSI, model, provider, and other project names or marks remain the property of their respective owners. Character IP, user material, model outputs, screenshots, linked content, and benchmark data may have rights or platform terms distinct from this repository. They are not included unless explicitly added, authorized, and reviewed.
 
